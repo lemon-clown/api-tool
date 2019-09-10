@@ -4,7 +4,6 @@ import yaml from 'js-yaml'
 import { isNotBlankString } from '@/util/type-util'
 
 
-
 /**
  *
  * @member url            api 路径
@@ -54,4 +53,40 @@ export function loadApiItemConfig (apiItemConfigPath: string, encoding = 'utf-8'
     }
   }
   return result
+}
+
+
+
+/**
+ * @member requestSchemaPath  requestSchema 的路径
+ * @member responseSchemaPath responseSchema 的路径
+ */
+export interface SchemaPaths {
+  requestSchemaPath: string
+  responseSchemaPath: string
+}
+
+
+/**
+ * 生成 request/response 数据对应的 schema 所在的路径
+ *
+ * @param schemaDir
+ * @param item
+ * @param createIfNotExists   若中间路径不存在，是否进行创建
+ */
+export function generateSchemaPaths(schemaDir: string, item: ApiItem, createIfNotExists: boolean): SchemaPaths | never {
+  const pn = path.join(schemaDir, item.group || '', item.name)
+  if (!fs.existsSync(pn)) {
+    if (createIfNotExists) fs.mkdirpSync(pn)
+    else {
+      throw new Error(`[generateSchemaPath]: ${ pn } is not exists.`)
+    }
+  }
+
+  const requestSchemaName = `${ item.method }-request.json`.toLowerCase()
+  const responseSchemaName = `${ item.method }-response.json`.toLowerCase()
+  return {
+    requestSchemaPath: path.join(pn, requestSchemaName),
+    responseSchemaPath: path.join(pn, responseSchemaName)
+  }
 }

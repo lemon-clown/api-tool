@@ -1,6 +1,6 @@
 import fs from 'fs-extra'
-import path from 'path'
 import * as TJS from '@lemon-clown/typescript-json-schema'
+import { generateSchemaPaths } from '@/core/api-item'
 import { logger } from '@/util/logger'
 import { ApiToolGeneratorContext } from './context'
 
@@ -26,20 +26,13 @@ export class ApiToolGenerator {
     }
 
     for (const item of context.apiItems) {
-      const pn = path.join(context.schemaDir, item.group || '', item.name)
-      if (!fs.existsSync(pn)) fs.mkdirpSync(pn)
+      const { requestSchemaPath, responseSchemaPath } = generateSchemaPaths(context.schemaDir, item, true)
 
-      // RequestData
-      const requestModel = context.generator.getSchemaForSymbol(item.requestModel)
-      const requestModelName = `${ item.method }-request.json`.toLowerCase()
-      doTask(item.requestModel, requestModel, path.join(pn, requestModelName))
-
-      // ResponseData
-      const responseModel = context.generator.getSchemaForSymbol(item.responseModel)
-      const responseModelName = `${ item.method }-response.json`.toLowerCase()
-      doTask(item.responseModel, responseModel, path.join(pn, responseModelName))
+      // RequestData / ResponseData
+      const responseSchema = context.generator.getSchemaForSymbol(item.responseModel)
+      const requestSchema = context.generator.getSchemaForSymbol(item.requestModel)
+      doTask(item.requestModel, requestSchema, requestSchemaPath)
+      doTask(item.responseModel, responseSchema, responseSchemaPath)
     }
   }
 }
-
-
