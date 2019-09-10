@@ -47,9 +47,10 @@ export function loadApiItemConfig (schemaRootPath: string, apiItemConfigPath: st
   for (const [key, val] of Object.entries(content)) {
     if (typeof val !== 'object') continue
     const {
-      url, method, name = key, desc = '', group = '', groupName = '',
+      url, name = key, desc = '', group = '', groupName = '',
       requestModel, responseModel, requestSchemaPath, responseSchemaPath
     } = val as any
+    const method = ((val as any).method || '').trim()
 
     // 检查是否是合法的 api-item，非法的将跳过
     if (
