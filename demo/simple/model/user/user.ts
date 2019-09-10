@@ -12,8 +12,8 @@ export interface User {
   nickname: string
   /**
    * user's age
-   * @min 0
-   * @max 1000
+   * @minimum 0
+   * @maximum 1000
    * @TJS-type integer
    */
   age: number

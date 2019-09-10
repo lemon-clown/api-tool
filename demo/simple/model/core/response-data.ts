@@ -4,6 +4,7 @@
 export interface ResponseData<T> {
   /**
    * response code
+   * @TJS-type integer
    */
   code: number
   /**
