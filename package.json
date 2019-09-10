@@ -8,6 +8,7 @@
   "scripts": {
     "debug:generate": "nodemon --watch src -e ts,tsx --exec node --inspect=5395 -r ts-node/register -r tsconfig-paths/register test/debug-generate.ts",
     "debug:serve": "nodemon --watch src -e ts,tsx --exec node --inspect=5395 -r ts-node/register -r tsconfig-paths/register test/debug-serve.ts",
+    "debug:generate-command": "node --inspect=5395 -r ts-node/register -r tsconfig-paths/register src/command generate demo/simple",
     "lint:fix": "eslint src/**/*.ts --fix",
     "prepublishOnly": "yarn lint:fix"
   },
@@ -22,6 +23,7 @@
     "@types/mockjs": "^1.0.2",
     "@types/node": "^12.7.3",
     "colorful-chalk-logger": "^0.3.2",
+    "commander": "^3.0.1",
     "fs-extra": "^8.1.0",
     "js-yaml": "^3.13.1",
     "json-schema-faker": "^0.5.0-rc17",

@@ -1,6 +1,5 @@
 import path from 'path'
-import { ApiToolGeneratorContext } from '@/core/generate/context'
-import { ApiToolGenerator } from '@/core/generate/generator'
+import { ApiToolGenerator, ApiToolGeneratorContext } from '@/core/generate'
 
 
 let running = false
