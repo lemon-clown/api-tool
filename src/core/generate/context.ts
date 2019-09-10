@@ -1,15 +1,16 @@
 import path from 'path'
 import ts from 'typescript'
 import * as TJS from '@lemon-clown/typescript-json-schema'
+import { ApiItem, loadApiItemConfig } from '@/core/api-item'
 import { ensureFilePathSync } from '@/util/fs-util'
-import { ApiItem, loadApiItemConfig } from '../api-item'
+import { logger } from '@/util/logger'
 
 
 /**
  * @member cwd                        执行命令所在的目录
  * @member tsconfigPath               tsconfig.json 所在的路径
- * @member modelDir                   待扫描的 ts 接口所在的文件夹（绝对路径或相对于 tsconfig.json 所在的路径）
- * @member schema                     生成的 Json-Schema 存放的文件夹（绝对路径或相对于 tsconfig.json 所在的路径）
+ * @member modelRootPath              待扫描的 ts 接口所在的文件夹（绝对路径或相对于 tsconfig.json 所在的路径）
+ * @member schemaRootPath             生成的 Json-Schema 存放的文件夹（绝对路径或相对于 tsconfig.json 所在的路径）
  * @member apiItemConfigPath          定义 ApiItems 的文件路径（yaml 格式）
  * @member encoding                   目标工程的文件编码（简单起见，只考虑所有的源码使用同一种编码格式）
  * @member additionalSchemaArgs       额外的构建 Schema 的选项
@@ -17,8 +18,8 @@ import { ApiItem, loadApiItemConfig } from '../api-item'
  */
 export interface ApiToolGeneratorContextParams {
   tsconfigPath: string
-  modelDir: string
-  schemaDir: string
+  modelRootPath: string
+  schemaRootPath: string
   apiItemConfigPath: string
   cwd?: string
   encoding?: string
@@ -30,20 +31,20 @@ export interface ApiToolGeneratorContextParams {
 /**
  * 生成器的上下文信息
  *
- * @member cwd        执行命令所在的目录
- * @member projectDir 待处理的目标工程路径（传进来的参数中，tsconfigPath 所在的目录）
- * @member modelDir   待扫描的 ts 接口所在的文件夹（绝对路径）
- * @member schemaDir  生成的 Json-Schema 存放的文件夹（绝对路径）
- * @member apiItems   ApiItem 列表，描述
- * @member encoding   目标工程的文件编码（简单起见，只考虑所有的源码使用同一种编码格式）；默认值为 utf-8
- * @member program    ts.Program: A Program is an immutable collection of 'SourceFile's and a 'CompilerOptions' that represent a compilation unit.
- * @member generator  Json-Schema 生成器
+ * @member cwd              执行命令所在的目录
+ * @member projectRootPath  待处理的目标工程路径（传进来的参数中，tsconfigPath 所在的目录）
+ * @member modelRootPath    待扫描的 ts 接口所在的文件夹（绝对路径）
+ * @member schemaRootPath   生成的 Json-Schema 存放的文件夹（绝对路径）
+ * @member apiItems         ApiItem 列表，描述
+ * @member encoding         目标工程的文件编码（简单起见，只考虑所有的源码使用同一种编码格式）；默认值为 utf-8
+ * @member program          ts.Program: A Program is an immutable collection of 'SourceFile's and a 'CompilerOptions' that represent a compilation unit.
+ * @member generator        Json-Schema 生成器
  */
 export class ApiToolGeneratorContext {
   public readonly cwd: string
-  public readonly projectDir: string
-  public readonly modelDir: string
-  public readonly schemaDir: string
+  public readonly projectRootPath: string
+  public readonly modelRootPath: string
+  public readonly schemaRootPath: string
   public readonly apiItems: ApiItem[]
   public readonly encoding: string
   public readonly program: ts.Program
@@ -53,8 +54,8 @@ export class ApiToolGeneratorContext {
     const {
       cwd = process.cwd(),
       encoding = 'utf-8',
-      modelDir,
-      schemaDir,
+      modelRootPath,
+      schemaRootPath,
       apiItemConfigPath,
       tsconfigPath,
       schemaArgs,
@@ -66,14 +67,21 @@ export class ApiToolGeneratorContext {
 
     this.cwd = cwd
     this.encoding = encoding
-    this.projectDir = path.resolve(this.cwd, path.dirname(tsconfigPath))
-    this.modelDir = path.resolve(this.projectDir, modelDir)
-    this.schemaDir = path.resolve(this.projectDir, schemaDir)
-    this.apiItems = loadApiItemConfig(apiItemConfigPath, encoding)
+    this.projectRootPath = path.resolve(this.cwd, path.dirname(tsconfigPath))
+    this.modelRootPath = path.resolve(this.projectRootPath, modelRootPath)
+    this.schemaRootPath = path.resolve(this.projectRootPath, schemaRootPath)
+    this.apiItems = loadApiItemConfig(this.schemaRootPath, apiItemConfigPath, encoding)
+
+    if (this.apiItems.length <= 0) {
+      logger.debug('[ApiToolGeneratorContext.constructor] params:', params)
+      throw new Error('no valid api item found.')
+    }
+
     this.program = this.buildProgram(tsconfigPath, additionalCompilerOptions)
     this.generator = TJS.buildGenerator(this.program, schemaArgs)!
 
     if (this.generator == null) {
+      logger.debug('[ApiToolGeneratorContext.constructor] params:', params)
       throw new Error('failed to build jsonSchemaGenerator.')
     }
   }
@@ -85,7 +93,8 @@ export class ApiToolGeneratorContext {
   private buildProgram (tsconfigPath: string, additionalCompilerOptions: ts.CompilerOptions = {}) {
     const result = ts.parseConfigFileTextToJson(tsconfigPath, ts.sys.readFile(tsconfigPath)!)
     const configObject = result.config
-    const configParseResult = ts.parseJsonConfigFileContent(configObject, ts.sys, path.dirname(tsconfigPath), additionalCompilerOptions, path.basename(tsconfigPath))
+    const configParseResult = ts.parseJsonConfigFileContent(
+      configObject, ts.sys, path.dirname(tsconfigPath), additionalCompilerOptions, path.basename(tsconfigPath))
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { out, outDir, outFile, declaration, declarationDir, declarationMap, ...restOptions } = configParseResult.options
