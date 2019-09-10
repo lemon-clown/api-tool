@@ -1,0 +1,7 @@
+get-user:
+  url: /api/user/:username
+  method: GET
+  desc: get user data by username
+  group: user
+  requestModel: GetUserRequestVo
+  responseModel: GetUserResponseVo

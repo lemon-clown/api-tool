@@ -6,6 +6,7 @@
   "private": true,
   "proxy": {},
   "scripts": {
+    "debug:generate": "nodemon --watch src -e ts,tsx --exec node --inspect=5395 -r ts-node/register -r tsconfig-paths/register test/debug-generate.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "prepublishOnly": "yarn lint:fix"
   },

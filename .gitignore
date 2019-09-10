@@ -10,7 +10,7 @@ release/
 
 *.tsbuildinfo
 tmp/
-/mock/data
+/demo/**/data/
 
 # local env files
 .env.local
