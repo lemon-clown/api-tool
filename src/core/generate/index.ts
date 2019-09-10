@@ -33,8 +33,8 @@ export class ApiToolGenerator {
       doTask(item.requestModel, requestSchema, item.requestSchemaPath)
 
       // ResponseData
-      const responseSchema = context.generator.getSchemaForSymbol(item.requestModel)
-      doTask(item.requestModel, responseSchema, item.responseSchemaPath)
+      const responseSchema = context.generator.getSchemaForSymbol(item.responseModel)
+      doTask(item.responseModel, responseSchema, item.responseSchemaPath)
    }
   }
 }
