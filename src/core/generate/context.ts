@@ -9,7 +9,6 @@ import { logger } from '@/util/logger'
 /**
  * @member cwd                        执行命令所在的目录
  * @member tsconfigPath               tsconfig.json 所在的路径
- * @member modelRootPath              待扫描的 ts 接口所在的文件夹（绝对路径或相对于 tsconfig.json 所在的路径）
  * @member schemaRootPath             生成的 Json-Schema 存放的文件夹（绝对路径或相对于 tsconfig.json 所在的路径）
  * @member apiItemConfigPath          定义 ApiItems 的文件路径（yaml 格式）
  * @member encoding                   目标工程的文件编码（简单起见，只考虑所有的源码使用同一种编码格式）
@@ -18,7 +17,6 @@ import { logger } from '@/util/logger'
  */
 export interface ApiToolGeneratorContextParams {
   tsconfigPath: string
-  modelRootPath: string
   schemaRootPath: string
   apiItemConfigPath: string
   cwd?: string
@@ -33,7 +31,6 @@ export interface ApiToolGeneratorContextParams {
  *
  * @member cwd              执行命令所在的目录
  * @member projectRootPath  待处理的目标工程路径（传进来的参数中，tsconfigPath 所在的目录）
- * @member modelRootPath    待扫描的 ts 接口所在的文件夹（绝对路径）
  * @member schemaRootPath   生成的 Json-Schema 存放的文件夹（绝对路径）
  * @member apiItems         ApiItem 列表，描述
  * @member encoding         目标工程的文件编码（简单起见，只考虑所有的源码使用同一种编码格式）；默认值为 utf-8
@@ -43,7 +40,6 @@ export interface ApiToolGeneratorContextParams {
 export class ApiToolGeneratorContext {
   public readonly cwd: string
   public readonly projectRootPath: string
-  public readonly modelRootPath: string
   public readonly schemaRootPath: string
   public readonly apiItems: ApiItem[]
   public readonly encoding: string
@@ -54,7 +50,6 @@ export class ApiToolGeneratorContext {
     const {
       cwd = process.cwd(),
       encoding = 'utf-8',
-      modelRootPath,
       schemaRootPath,
       apiItemConfigPath,
       tsconfigPath,
@@ -68,7 +63,6 @@ export class ApiToolGeneratorContext {
     this.cwd = cwd
     this.encoding = encoding
     this.projectRootPath = path.resolve(this.cwd, path.dirname(tsconfigPath))
-    this.modelRootPath = path.resolve(this.projectRootPath, modelRootPath)
     this.schemaRootPath = path.resolve(this.projectRootPath, schemaRootPath)
     this.apiItems = loadApiItemConfig(this.schemaRootPath, apiItemConfigPath, encoding)
 

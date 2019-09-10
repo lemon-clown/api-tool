@@ -1,6 +1,6 @@
 import path from 'path'
 import { ApiToolGeneratorContext } from '@/core/generate/context'
-import { ApiToolGenerator } from '@/core/generate'
+import { ApiToolGenerator } from '@/core/generate/generator'
 
 
 let running = false
@@ -9,7 +9,6 @@ async function debug() {
   running = true
   const apiToolGeneratorContext = new ApiToolGeneratorContext({
     tsconfigPath: path.resolve('demo/simple/tsconfig.json'),
-    modelRootPath: path.resolve('demo/simple/model'),
     schemaRootPath: path.resolve('demo/simple/data/schemas'),
     apiItemConfigPath: path.resolve('demo/simple/api.yml'),
     schemaArgs: {
