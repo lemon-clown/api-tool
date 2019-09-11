@@ -4,6 +4,7 @@
       "es6"
     ],
     "rootDir": ".",
+    "outDir": "./lib",
     "module": "commonjs",
     "target": "es6",
     "moduleResolution": "node",
@@ -35,8 +36,9 @@
     }
   },
   "include": [
-    "test",
     "src",
+    "test",
+    "script",
     "package.json"
   ]
 }
