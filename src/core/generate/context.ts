@@ -1,9 +1,11 @@
+import fs from 'fs-extra'
 import path from 'path'
 import ts from 'typescript'
 import * as TJS from '@lemon-clown/typescript-json-schema'
 import { ApiItem, loadApiItemConfig } from '@/core/api-item'
-import { ensureFilePathSync } from '@/util/fs-util'
 import { logger } from '@/util/logger'
+import { ensureFilePathSync, isFileSync } from '@/util/fs-util'
+import { isNotBlankString } from '@/util/type-util'
 
 
 /**
@@ -23,6 +25,31 @@ export interface ApiToolGeneratorContextParams {
   encoding?: string
   schemaArgs?: TJS.PartialArgs
   additionalCompilerOptions?: ts.CompilerOptions
+}
+
+
+/**
+ * 通过 json 格式的文件构造 ApiToolGeneratorContextParams
+ *
+ * @param contextParamsConfigPath   json 格式的配置文件
+ */
+export function parseApiToolGeneratorContextParams(contextParamsConfigPath: string): Partial<ApiToolGeneratorContextParams> {
+  if (!isFileSync(contextParamsConfigPath)) {
+    if (isNotBlankString(contextParamsConfigPath)) {
+      logger.warn(`${ contextParamsConfigPath } is not a valid filepath, skipped.`)
+    }
+    return {}
+  }
+
+  try {
+    const obj: any = fs.readJSONSync(contextParamsConfigPath)
+    if (typeof obj !== 'object') return {}
+    const { tsconfigPath, schemaRootPath, apiItemConfigPath, cwd, encoding, schemaArgs, additionalCompilerOptions } = obj
+    return { tsconfigPath, schemaRootPath, apiItemConfigPath, cwd, encoding, schemaArgs, additionalCompilerOptions }
+  } catch (error) {
+    logger.error(`${ contextParamsConfigPath } is not a valid JSON file`)
+    throw error
+  }
 }
 
 

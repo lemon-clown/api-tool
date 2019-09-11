@@ -6,15 +6,26 @@ import manifest from '../package.json'
 
 
 const globalOptions: GlobalOptions = {
-  cwd: process.cwd(),
-  encoding: 'utf-8',
+  cwd: {
+    value: process.cwd(),
+    userSpecified: false,
+  },
+  encoding: {
+    value: 'utf-8',
+    userSpecified: false,
+  },
 }
+
+
+const coverGlobalOption = (key: keyof GlobalOptions) => (t: any) => globalOptions[key] = { value: t, userSpecified: true }
 
 
 program
   .version(manifest.version)
   .option('--encoding <encoding>', 'index encoding of all files.', 'utf-8')
-  .on('option:encoding', encoding => globalOptions.encoding = encoding)
+  .on('option:cwd', coverGlobalOption('cwd'))
+  .on('option:encoding', coverGlobalOption('encoding'))
+
 
 // load global options
 logger.registerToCommander(program)
