@@ -6,7 +6,7 @@ import { ApiToolGeneratorContext } from './context'
 
 
 export class ApiToolGenerator {
-  protected context: ApiToolGeneratorContext
+  protected readonly context: ApiToolGeneratorContext
 
   public constructor (context: ApiToolGeneratorContext) {
     this.context = context

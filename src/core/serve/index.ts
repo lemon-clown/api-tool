@@ -12,7 +12,7 @@ const jsf = require('json-schema-faker')
 
 
 export class ApiToolMockServer {
-  protected context: ApiToolServeContext
+  protected readonly context: ApiToolServeContext
 
   public constructor (context: ApiToolServeContext) {
     this.context = context
