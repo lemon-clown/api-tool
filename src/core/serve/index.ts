@@ -5,7 +5,7 @@ import { logger } from '@/util/logger'
 import { isNotBlankString, isNumberLike } from '@/util/type-util'
 import { ApiToolServeContext } from './context'
 import { ApiToolMockServer } from './server'
-export { ApiToolServeContext, ApiToolServeContextParams } from './context'
+export { ApiToolServeContext } from './context'
 export { ApiToolMockServer } from './server'
 
 

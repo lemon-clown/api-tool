@@ -3,9 +3,9 @@ import commander from 'commander'
 import { GlobalOptions } from '@/types'
 import { logger } from '@/util/logger'
 import { isNotBlankString } from '@/util/type-util'
-import { ApiToolGeneratorContext, ApiToolGeneratorContextParams, parseApiToolGeneratorContextParams } from './context'
+import { ApiToolGeneratorContext, parseApiToolGeneratorContextParams, ApiToolGeneratorContextParams } from './context'
 import { ApiToolGenerator } from './generator'
-export { ApiToolGeneratorContext, ApiToolGeneratorContextParams, parseApiToolGeneratorContextParams } from './context'
+export { ApiToolGeneratorContext, parseApiToolGeneratorContextParams } from './context'
 export { ApiToolGenerator } from './generator'
 
 
