@@ -1,0 +1,6 @@
+{
+  "schemaArgs": {
+    "ref": false,
+    "required": true
+  }
+}
