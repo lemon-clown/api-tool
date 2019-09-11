@@ -6,9 +6,12 @@
   "private": true,
   "proxy": {},
   "scripts": {
-    "debug:generate": "nodemon --watch src -e ts,tsx --exec node --inspect=5395 -r ts-node/register -r tsconfig-paths/register test/debug-generate.ts --log-level=debug",
-    "debug:serve": "nodemon --watch src -e ts,tsx --exec node --inspect=5395 -r ts-node/register -r tsconfig-paths/register test/debug-serve.ts --log-level=debug",
-    "debug:generate-command": "node --inspect=5395 -r ts-node/register -r tsconfig-paths/register src/command generate demo/simple --log-level=debug",
+    "debug:exec": "node --inspect=5395 -r ts-node/register -r tsconfig-paths/register",
+    "debug:exec:nodemon": "nodemon --watch src -e ts,tsx --exec node --inspect=5395 -r ts-node/register -r tsconfig-paths/register",
+    "debug:generate": "yarn debug:exec:nodemon test/debug-generate.ts --log-level=debug",
+    "debug:generate-command": "yarn debug:exec src/command generate demo/simple --log-level=debug",
+    "debug:serve": "yarn debug:exec:nodemon test/debug-serve.ts --log-level=debug",
+    "debug:serve-command": "yarn debug:exec src/command serve demo/simple --log-level=debug",
     "lint:fix": "eslint src/**/*.ts --fix",
     "prepublishOnly": "yarn lint:fix"
   },

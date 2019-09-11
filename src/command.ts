@@ -1,6 +1,7 @@
 import program from 'commander'
 import { GlobalOptions } from '@/types'
 import { loadGenerateCommand } from '@/core/generate'
+import { loadServeCommand } from '@/core/serve'
 import { logger } from '@/util/logger'
 import manifest from '../package.json'
 
@@ -32,6 +33,7 @@ logger.registerToCommander(program)
 
 // load sub-commands
 loadGenerateCommand(program, globalOptions)
+loadServeCommand(program, globalOptions)
 
 
 program
