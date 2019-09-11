@@ -13,12 +13,13 @@ const jsf = require('json-schema-faker')
 
 export class ApiToolMockServer {
   protected readonly context: ApiToolServeContext
+  protected server: http.Server | null = null
 
   public constructor (context: ApiToolServeContext) {
     this.context = context
   }
 
-  public async start(): Promise<http.Server> {
+  public async start(): Promise<void> {
     const { host, port } = this.context
     const app = new Koa()
     const router = await this.generateRoutes()
@@ -33,11 +34,22 @@ export class ApiToolMockServer {
     const server = app.listen(port, host, () => {
       const url = `http://${ host }:${ port }`
       const address = JSON.stringify(server.address())
-      console.log(`address: ${ address }`)
-      console.log(`listening on ${ url }`)
+      logger.info(`address: ${ address }`)
+      logger.info(`listening on ${ url }`)
     })
 
-    return server
+    this.server = server
+  }
+
+  /**
+   * 停止服务器
+   */
+  public close (): void {
+    if (this.server != null) {
+      logger.info('server closing...')
+      this.server.close()
+      this.server = null
+    }
   }
 
   /**

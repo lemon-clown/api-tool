@@ -14,6 +14,10 @@ async function debug() {
 
   const server = new ApiToolMockServer(apiToolServeContext)
   server.start()
+
+  // 30s 后关闭服务器
+  await new Promise(resolve => setTimeout(resolve, 30000))
+  server.close()
 }
 
 
