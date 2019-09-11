@@ -4,9 +4,10 @@ import Koa from 'koa'
 import http from 'http'
 import Router from 'koa-router'
 import koaJson from 'koa-json'
-import { ApiToolServeContext } from './context'
 import { isFile } from '@/util/fs-util'
 import { logger } from '@/util/logger'
+import { accessLog } from './middleware/access-log'
+import { ApiToolServeContext } from './context'
 const koaCors = require('@koa/cors')
 const jsf = require('json-schema-faker')
 
@@ -25,6 +26,7 @@ export class ApiToolMockServer {
     const router = await this.generateRoutes()
 
     app
+      .use(accessLog())
       .use(koaCors())
       .use(koaJson())
       .use(router.routes())
