@@ -29,12 +29,16 @@ export class ApiToolGenerator {
 
     for (const item of context.apiItems) {
       // RequestData
-      const requestSchema = context.generator.getSchemaForSymbol(item.requestModel)
-      doTask(item.requestModel, requestSchema, item.requestSchemaPath)
+      if (item.requestModel != null) {
+        const requestSchema = context.generator.getSchemaForSymbol(item.requestModel)
+        doTask(item.requestModel, requestSchema, item.requestSchemaPath)
+      }
 
       // ResponseData
-      const responseSchema = context.generator.getSchemaForSymbol(item.responseModel)
-      doTask(item.responseModel, responseSchema, item.responseSchemaPath)
+        if (item.responseModel != null) {
+        const responseSchema = context.generator.getSchemaForSymbol(item.responseModel)
+        doTask(item.responseModel, responseSchema, item.responseSchemaPath)
+      }
    }
   }
 }

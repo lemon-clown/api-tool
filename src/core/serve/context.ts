@@ -1,5 +1,5 @@
 import path from 'path'
-import { ApiItem, loadApiItemConfig } from '@/core/api-item'
+import { ApiItem, ApiItemParser } from '@/core/api-item'
 
 
 /**
@@ -64,6 +64,12 @@ export class ApiToolServeContext {
     this.encoding = encoding
     this.projectDir = path.resolve(this.cwd, projectDir)
     this.schemaRootPath = path.resolve(this.projectDir, schemaRootPath)
-    this.apiItems = loadApiItemConfig(this.schemaRootPath, apiItemConfigPath, encoding)
+
+    const apiItemParser = new ApiItemParser({
+      schemaRootPath: this.schemaRootPath,
+      encoding: this.encoding
+    })
+    apiItemParser.loadFromApiConfig(apiItemConfigPath)
+    this.apiItems = apiItemParser.collect()
   }
 }

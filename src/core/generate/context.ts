@@ -2,7 +2,7 @@ import fs from 'fs-extra'
 import path from 'path'
 import ts from 'typescript'
 import * as TJS from '@lemon-clown/typescript-json-schema'
-import { ApiItem, loadApiItemConfig } from '@/core/api-item'
+import { ApiItem, ApiItemParser } from '@/core/api-item'
 import { logger } from '@/util/logger'
 import { ensureFilePathSync, isFileSync } from '@/util/fs-util'
 import { isNotBlankString } from '@/util/type-util'
@@ -91,7 +91,14 @@ export class ApiToolGeneratorContext {
     this.encoding = encoding
     this.projectRootPath = path.resolve(this.cwd, path.dirname(tsconfigPath))
     this.schemaRootPath = path.resolve(this.projectRootPath, schemaRootPath)
-    this.apiItems = loadApiItemConfig(this.schemaRootPath, apiItemConfigPath, encoding)
+
+    const apiItemParser = new ApiItemParser({
+      schemaRootPath: this.schemaRootPath,
+      encoding: this.encoding,
+    })
+
+    apiItemParser.loadFromApiConfig(apiItemConfigPath)
+    this.apiItems = apiItemParser.collect()
 
     if (this.apiItems.length <= 0) {
       logger.debug('[ApiToolGeneratorContext.constructor] params:', params)
