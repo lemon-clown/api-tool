@@ -1,11 +1,9 @@
-import fs from 'fs-extra'
 import path from 'path'
 import ts from 'typescript'
 import * as TJS from '@lemon-clown/typescript-json-schema'
 import { ApiItem, ApiItemParser } from '@/core/api-item'
 import { logger } from '@/util/logger'
-import { ensureFilePathSync, isFileSync } from '@/util/fs-util'
-import { isNotBlankString } from '@/util/type-util'
+import { ensureFilePathSync } from '@/util/fs-util'
 
 
 /**
@@ -30,30 +28,6 @@ export interface ApiToolGeneratorContextParams {
 }
 
 
-/**
- * 通过 json 格式的文件构造 ApiToolGeneratorContextParams
- *
- * @param contextParamsConfigPath   json 格式的配置文件
- */
-export function parseApiToolGeneratorContextParams(contextParamsConfigPath: string): Partial<ApiToolGeneratorContextParams> {
-  if (!isFileSync(contextParamsConfigPath)) {
-    if (isNotBlankString(contextParamsConfigPath)) {
-      logger.warn(`${ contextParamsConfigPath } is not a valid filepath, skipped.`)
-    }
-    return {}
-  }
-
-  try {
-    const obj: any = fs.readJSONSync(contextParamsConfigPath)
-    if (obj == null || typeof obj !== 'object') return {}
-    const { tsconfigPath, schemaRootPath, apiItemConfigPath, cwd, encoding, schemaArgs, additionalCompilerOptions, ignoreMissingModels } = obj
-    return { tsconfigPath, schemaRootPath, apiItemConfigPath, cwd, encoding, schemaArgs, additionalCompilerOptions, ignoreMissingModels }
-  } catch (error) {
-    logger.error(`${ contextParamsConfigPath } is not a valid JSON file`)
-    throw error
-  }
-}
-
 
 /**
  * 生成器的上下文信息
@@ -77,7 +51,7 @@ export class ApiToolGeneratorContext {
   public readonly program: ts.Program
   public readonly generator: TJS.JsonSchemaGenerator
 
-  public constructor (params: ApiToolGeneratorContextParams) {
+  public constructor(params: ApiToolGeneratorContextParams) {
     const {
       cwd = process.cwd(),
       encoding = 'utf-8',
@@ -124,7 +98,7 @@ export class ApiToolGeneratorContext {
    * create ts program instance
    * @param params
    */
-  private buildProgram (tsconfigPath: string, additionalCompilerOptions: ts.CompilerOptions = {}) {
+  private buildProgram(tsconfigPath: string, additionalCompilerOptions: ts.CompilerOptions = {}) {
     const result = ts.parseConfigFileTextToJson(tsconfigPath, ts.sys.readFile(tsconfigPath)!)
     const configObject = result.config
     const configParseResult = ts.parseJsonConfigFileContent(

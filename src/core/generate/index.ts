@@ -3,10 +3,11 @@ import commander from 'commander'
 import { GlobalOptions } from '@/types'
 import { logger } from '@/util/logger'
 import { isNotBlankString } from '@/util/type-util'
-import { ApiToolGeneratorContext, parseApiToolGeneratorContextParams, ApiToolGeneratorContextParams } from './context'
+import { coverBoolean, coverString, coverStringForCliOption } from '@/util/option-util'
+import { parseApiToolConfig } from '@/util/config-util'
+import { ApiToolGeneratorContext, ApiToolGeneratorContextParams } from './context'
 import { ApiToolGenerator } from './generator'
-import { coverBoolean, cover } from '@/util/option-util'
-export { ApiToolGeneratorContext, parseApiToolGeneratorContextParams } from './context'
+export { ApiToolGeneratorContext } from './context'
 export { ApiToolGenerator } from './generator'
 
 
@@ -33,10 +34,10 @@ export function loadGenerateCommand (program: commander.Command, globalOptions: 
   program
     .command('generate <project-dir>')
     .alias('g')
-    .option('-p, --tsconfig <tsconfig-path>', 'specify the location (absolute or relative to the projectDir) of typescript config file.', 'tsconfig.json')
+    .option('-p, --tsconfig-path <tsconfig-path>', 'specify the location (absolute or relative to the projectDir) of typescript config file.', 'tsconfig.json')
     .option('-s, --schema-root-path <schema-root-path>', 'specify the root directory (absolute or relative to the projectDir) to save schemas.', 'data/schemas')
     .option('-i, --api-item-config <api-item-config-path>', 'specify the location (absolute or relative to the projectDir) of file contains apiItems.', 'api.yml')
-    .option('-c, --config <config-path>', 'specify generate-config.json (absolute or relative to the projectDir) to create context params (lower priority)', 'api-generate-config.json')
+    .option('-c, --config-path <config-path>', 'specify config file (absolute or relative to the projectDir) to create context params (lower priority)', 'app.yml')
     .option('-I, --ignore-missing-models', 'ignore missing model')
     .action(async function (projectDir: string, options: GenerateOptions) {
       const cwd = globalOptions.cwd.value
@@ -45,13 +46,14 @@ export function loadGenerateCommand (program: commander.Command, globalOptions: 
       logger.debug('[generate] rawProjectDir:', projectDir)
 
       projectDir = path.resolve(cwd, projectDir)
-      const resolvePath = (key: keyof Pick<GenerateOptions, 'configPath' | 'tsconfigPath' | 'schemaRootPath' | 'apiItemConfigPath'>, defaultValue: string) => {
-        if (isNotBlankString(options[key])) return path.resolve(projectDir, options[key])
-        return path.resolve(projectDir, defaultValue)
+      const configPath = path.resolve(projectDir, coverString('app.yml', options.configPath))
+      const contextParams: Partial<ApiToolGeneratorContextParams> = parseApiToolConfig(configPath, 'serve')
+      // 计算路径
+      const resolvePath = (key: keyof Pick<ApiToolGeneratorContextParams, 'tsconfigPath' | 'schemaRootPath' | 'apiItemConfigPath'>, defaultValue: string): string => {
+        const value = coverStringForCliOption(defaultValue, contextParams[key], options[key])
+        return path.resolve(projectDir, value)
       }
 
-      const configPath = resolvePath('configPath', 'api-generate-config.json')
-      const contextParams: Partial<ApiToolGeneratorContextParams> = parseApiToolGeneratorContextParams(configPath)
       const tsconfigPath = resolvePath('tsconfigPath', contextParams.tsconfigPath || 'tsconfig.json')
       const schemaRootPath = resolvePath('schemaRootPath', contextParams.schemaRootPath || 'data/schemas')
       const apiItemConfigPath = resolvePath('apiItemConfigPath', contextParams.apiItemConfigPath || 'api.yml')
@@ -70,7 +72,7 @@ export function loadGenerateCommand (program: commander.Command, globalOptions: 
       logger.debug('[generate] contextParams:', contextParams)
       logger.debug('[generate] globalOptions:', globalOptions)
 
-     const context = new ApiToolGeneratorContext({
+      const context = new ApiToolGeneratorContext({
         ...contextParams,
         cwd,
         encoding,

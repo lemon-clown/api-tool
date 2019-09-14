@@ -81,3 +81,53 @@ export function coverBoolean(defaultValue: boolean, value?: any): boolean {
   if (typeof value === 'string') return isNotBlankString(value) && value !== 'false'
   return Boolean(value)
 }
+
+
+/**
+ * 优先 optionValue，其次 configValue，其次 defaultValue
+ *
+ * @export
+ * @param {string} defaultValue
+ * @param {*} [configValue]
+ * @param {*} [cliValue]
+ * @returns {string}
+ */
+export function coverStringForCliOption(
+  defaultValue: string,
+  configValue?:any,
+  cliValue?: any,
+): string {
+  const value = coverString(configValue, cliValue)
+  return coverString(defaultValue, value)
+}
+
+
+/**
+ * 优先 optionValue，其次 configValue，其次 defaultValue
+ *
+ * @export
+ * @param {number} defaultValue
+ * @param {*} [configValue]
+ * @param {*} [cliValue]
+ * @param {{
+ *     minValue?: number,
+ *     maxValue?: number,
+ *   }} [limits]
+ * @returns {number}
+ */
+export function coverNumberForCliOption(
+  defaultValue: number,
+  configValue?: any,
+  cliValue?: any,
+  limits?: {
+    minValue?: number,
+    maxValue?: number,
+  }
+): number {
+  let value = coverNumber(configValue, cliValue)
+  value = coverNumber(defaultValue, value)
+  if (limits == null) return value
+  if (limits.minValue != null) value = Math.max(limits.minValue, value)
+  if (limits.maxValue != null) value = Math.min(limits.maxValue, value)
+  return value
+}

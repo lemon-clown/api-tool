@@ -2,10 +2,10 @@ import path from 'path'
 import commander from 'commander'
 import { GlobalOptions } from '@/types'
 import { logger } from '@/util/logger'
-import { isNotBlankString, isNumberLike } from '@/util/type-util'
-import { ApiToolServeContext } from './context'
+import { ApiToolServeContext, ApiToolServeContextParams } from './context'
 import { ApiToolMockServer } from './server'
-import { coverBoolean, coverNumber } from '@/util/option-util'
+import { coverBoolean, coverString, coverStringForCliOption, coverNumberForCliOption } from '@/util/option-util'
+import { parseApiToolConfig } from '@/util/config-util'
 export { ApiToolServeContext } from './context'
 export { ApiToolMockServer } from './server'
 
@@ -28,6 +28,7 @@ export interface ServerOptions {
   schemaRootPath: string
   apiItemConfigPath: string
   prefixUrl: string
+  configPath: string
   requiredOnly: boolean
   alwaysFakeOptionals: boolean
   optionalsProbability?: number
@@ -47,6 +48,7 @@ export function loadServeCommand (program: commander.Command, globalOptions: Glo
     .option('-p, --port <port>', 'specify the port on which the mock-server listens.', 8080)
     .option('-s, --schema-root-path <schema-root-path>', 'specify the root directory (absolute or relative to the projectDir) to save schemas.', 'data/schemas')
     .option('-i, --api-item-config <api-item-config-path>', 'specify the location (absolute or relative to the projectDir) of file contains apiItems.', 'api.yml')
+    .option('-c, --config-path <config-path>', 'specify config file (absolute or relative to the projectDir) to create context params (lower priority)', 'app.yml')
     .option('--prefix-url <prefix-url>', 'specify the prefix url of routes', '')
     .option('--required-only', 'json-schema-faker\'s option: if enabled, only required properties will be generated')
     .option('--always-fake-optionals', 'json-schema-faker\'s option: when enabled, it will set optionalsProbability: 1.0 and fixedProbabilities: true')
@@ -57,27 +59,28 @@ export function loadServeCommand (program: commander.Command, globalOptions: Glo
       logger.debug('[serve] rawProjectDir:', projectDir)
 
       projectDir = path.resolve(cwd, projectDir)
-      const resolvePath = (key: keyof Pick<ServerOptions, 'schemaRootPath' | 'apiItemConfigPath'>, defaultValue: string) => {
-        if (isNotBlankString(options[key])) return path.resolve(projectDir, options[key])
-        return path.resolve(projectDir, defaultValue)
+      const configPath = path.resolve(projectDir, coverString('app.yml', options.configPath))
+      const contextParams: Partial<ApiToolServeContextParams> = parseApiToolConfig(configPath, 'serve')
+
+      // 计算路径
+      const resolvePath = (key: keyof Pick<ApiToolServeContextParams, 'schemaRootPath' | 'apiItemConfigPath'>, defaultValue: string): string => {
+        const value = coverStringForCliOption(defaultValue, contextParams[key], options[key])
+        return path.resolve(projectDir, value)
       }
 
-      const host: string = isNotBlankString(options.host) ? options.host! : 'localhost'
-      const port: number = Math.min(65536, Math.max(0, isNumberLike(options.port) ? Number.parseInt(options.port as any) : 8080))
-      const prefixUrl: string = isNotBlankString(options.prefixUrl) ? options.prefixUrl! : ''
+      const host: string = coverStringForCliOption('localhost', contextParams.host, options.host)
+      const port: number = coverNumberForCliOption(8080, contextParams.port, options.port, { minValue: 1, maxValue: 65536 })
+      const prefixUrl: string = coverStringForCliOption('', contextParams.prefixUrl, options.prefixUrl)
       const encoding = globalOptions.encoding.value
       const schemaRootPath = resolvePath('schemaRootPath', 'data/schemas')
       const apiItemConfigPath = resolvePath('apiItemConfigPath', 'api.yml')
-
-      console.log('options.requiredOnly:', options.requiredOnly)
-      console.log('options.alwaysFakeOptionals:', options.alwaysFakeOptionals)
-
       const requiredOnly = coverBoolean(false, options.requiredOnly)
       const alwaysFakeOptionals = coverBoolean(false, options.alwaysFakeOptionals)
-      const optionalsProbability = coverNumber(.8, options.optionalsProbability)
+      const optionalsProbability: number = coverNumberForCliOption(.8, contextParams.optionalsProbability, options.optionalsProbability)
 
       logger.debug('[serve] encoding:', encoding)
       logger.debug('[serve] projectDir:', projectDir)
+      logger.debug('[serve] configPath:', configPath)
       logger.debug('[serve] host:', host)
       logger.debug('[serve] port:', port)
       logger.debug('[serve] prefixUrl:', prefixUrl)

@@ -2,7 +2,7 @@ import path from 'path'
 import { isNotBlankString } from '@/util/type-util'
 import { coverString, cover } from '@/util/option-util'
 import { convertToCamel, convertToKebab } from '@/util/string-util'
-import { loadConfigDataSync } from '@/util/fs-util'
+import { loadConfigDataSync } from '@/util/config-util'
 import { HttpVerb, ApiItem, ApiItemGroup, RawApiItemGroup, RawApiItem } from './types'
 
 
