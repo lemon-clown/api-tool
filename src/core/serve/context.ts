@@ -21,8 +21,8 @@ export interface ApiToolServeContextParams {
   projectDir: string
   schemaRootPath: string
   apiItemConfigPath: string
-  requiredOnly: boolean
-  alwaysFakeOptionals: boolean
+  requiredOnly?: boolean
+  alwaysFakeOptionals?: boolean
   optionalsProbability?: number
   cwd?: string
   prefixUrl?: string
@@ -69,8 +69,8 @@ export class ApiToolServeContext {
       schemaRootPath,
       apiItemConfigPath,
       optionalsProbability = .8,
-      requiredOnly,
-      alwaysFakeOptionals,
+      requiredOnly = false,
+      alwaysFakeOptionals = false,
     } = params
     this.cwd = cwd
     this.host = host
