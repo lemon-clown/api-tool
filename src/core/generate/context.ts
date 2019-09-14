@@ -12,6 +12,7 @@ import { isNotBlankString } from '@/util/type-util'
  * @member cwd                        执行命令所在的目录
  * @member tsconfigPath               tsconfig.json 所在的路径
  * @member schemaRootPath             生成的 Json-Schema 存放的文件夹（绝对路径或相对于 tsconfig.json 所在的路径）
+ * @member ignoreMissingModels        忽略未找到的模型
  * @member apiItemConfigPath          定义 ApiItems 的文件路径（yaml 格式）
  * @member encoding                   目标工程的文件编码（简单起见，只考虑所有的源码使用同一种编码格式）
  * @member additionalSchemaArgs       额外的构建 Schema 的选项
@@ -21,6 +22,7 @@ export interface ApiToolGeneratorContextParams {
   tsconfigPath: string
   schemaRootPath: string
   apiItemConfigPath: string
+  ignoreMissingModels: boolean
   cwd?: string
   encoding?: string
   schemaArgs?: TJS.PartialArgs
@@ -44,8 +46,8 @@ export function parseApiToolGeneratorContextParams(contextParamsConfigPath: stri
   try {
     const obj: any = fs.readJSONSync(contextParamsConfigPath)
     if (typeof obj !== 'object') return {}
-    const { tsconfigPath, schemaRootPath, apiItemConfigPath, cwd, encoding, schemaArgs, additionalCompilerOptions } = obj
-    return { tsconfigPath, schemaRootPath, apiItemConfigPath, cwd, encoding, schemaArgs, additionalCompilerOptions }
+    const { tsconfigPath, schemaRootPath, apiItemConfigPath, cwd, encoding, schemaArgs, additionalCompilerOptions, ignoreMissingModels } = obj
+    return { tsconfigPath, schemaRootPath, apiItemConfigPath, cwd, encoding, schemaArgs, additionalCompilerOptions, ignoreMissingModels }
   } catch (error) {
     logger.error(`${ contextParamsConfigPath } is not a valid JSON file`)
     throw error
@@ -56,13 +58,14 @@ export function parseApiToolGeneratorContextParams(contextParamsConfigPath: stri
 /**
  * 生成器的上下文信息
  *
- * @member cwd              执行命令所在的目录
- * @member projectRootPath  待处理的目标工程路径（传进来的参数中，tsconfigPath 所在的目录）
- * @member schemaRootPath   生成的 Json-Schema 存放的文件夹（绝对路径）
- * @member apiItems         ApiItem 列表，描述
- * @member encoding         目标工程的文件编码（简单起见，只考虑所有的源码使用同一种编码格式）；默认值为 utf-8
- * @member program          ts.Program: A Program is an immutable collection of 'SourceFile's and a 'CompilerOptions' that represent a compilation unit.
- * @member generator        Json-Schema 生成器
+ * @member cwd                  执行命令所在的目录
+ * @member projectRootPath      待处理的目标工程路径（传进来的参数中，tsconfigPath 所在的目录）
+ * @member schemaRootPath       生成的 Json-Schema 存放的文件夹（绝对路径）
+ * @member apiItems             ApiItem 列表，描述
+ * @member encoding             目标工程的文件编码（简单起见，只考虑所有的源码使用同一种编码格式）；默认值为 utf-8
+ * @member ignoreMissingModels  忽略未找到的模型
+ * @member program              ts.Program: A Program is an immutable collection of 'SourceFile's and a 'CompilerOptions' that represent a compilation unit.
+ * @member generator            Json-Schema 生成器
  */
 export class ApiToolGeneratorContext {
   public readonly cwd: string
@@ -70,6 +73,7 @@ export class ApiToolGeneratorContext {
   public readonly schemaRootPath: string
   public readonly apiItems: ApiItem[]
   public readonly encoding: string
+  public readonly ignoreMissingModels: boolean
   public readonly program: ts.Program
   public readonly generator: TJS.JsonSchemaGenerator
 
@@ -77,6 +81,7 @@ export class ApiToolGeneratorContext {
     const {
       cwd = process.cwd(),
       encoding = 'utf-8',
+      ignoreMissingModels,
       schemaRootPath,
       apiItemConfigPath,
       tsconfigPath,
@@ -89,6 +94,7 @@ export class ApiToolGeneratorContext {
 
     this.cwd = cwd
     this.encoding = encoding
+    this.ignoreMissingModels = ignoreMissingModels
     this.projectRootPath = path.resolve(this.cwd, path.dirname(tsconfigPath))
     this.schemaRootPath = path.resolve(this.projectRootPath, schemaRootPath)
 

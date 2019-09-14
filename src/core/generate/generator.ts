@@ -22,8 +22,11 @@ export class ApiToolGenerator {
       // 如果模型未找到，则跳过
       const symbols = context.generator.getSymbols(modelName)
       if (symbols.length <= 0) {
-        logger.warn(`cannot find ${ modelName }. skipped.`)
-        return
+        if (context.ignoreMissingModels) {
+          logger.info(`cannot find ${ modelName }. skipped.`)
+          return
+        }
+        throw new Error(`${ modelName } not found.`)
       }
 
       const model: TJS.Definition = context.generator.getSchemaForSymbol(modelName)
