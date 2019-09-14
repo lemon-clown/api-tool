@@ -18,7 +18,15 @@ export class ApiToolGenerator {
   public async generate () {
     const { context } = this
     const tasks: Promise<void>[] = []
-    const doTask = (modelName: string, model: TJS.Definition, filepath: string) => {
+    const doTask = (modelName: string, filepath: string) => {
+      // 如果模型未找到，则跳过
+      const symbols = context.generator.getSymbols(modelName)
+      if (symbols.length <= 0) {
+        logger.warn(`cannot find ${ modelName }. skipped.`)
+        return
+      }
+
+      const model: TJS.Definition = context.generator.getSchemaForSymbol(modelName)
       const data = JSON.stringify(model, null, 2)
       const dirname = path.dirname(filepath)
       if (!fs.existsSync(dirname)) fs.mkdirpSync(dirname)
@@ -30,15 +38,13 @@ export class ApiToolGenerator {
     for (const item of context.apiItems) {
       // RequestData
       if (item.requestModel != null) {
-        const requestSchema = context.generator.getSchemaForSymbol(item.requestModel)
-        doTask(item.requestModel, requestSchema, item.requestSchemaPath)
+        doTask(item.requestModel, item.requestSchemaPath)
       }
 
       // ResponseData
-        if (item.responseModel != null) {
-        const responseSchema = context.generator.getSchemaForSymbol(item.responseModel)
-        doTask(item.responseModel, responseSchema, item.responseSchemaPath)
+      if (item.responseModel != null) {
+        doTask(item.responseModel, item.responseSchemaPath)
       }
-   }
+    }
   }
 }
