@@ -2,6 +2,7 @@
 import fs from 'fs-extra'
 import Koa from 'koa'
 import http from 'http'
+import chalk from 'chalk'
 import Router from 'koa-router'
 import koaJson from 'koa-json'
 import { isFile } from '@/util/fs-util'
@@ -61,7 +62,7 @@ export class ApiToolMockServer {
     const { encoding, prefixUrl, apiItems } = this.context
     const router = new Router({ prefix: prefixUrl })
     for (const item of apiItems) {
-      logger.info(`load router: ${ item.method.padEnd(6) } ${ prefixUrl }${ item.url } response(${ item.responseModel })`)
+      logger.info(`load router: ${ item.method.padEnd(6) } ${ prefixUrl }${ item.url }  ${ chalk.gray('(' + (item.responseModel || '') + ')') }`)
       router.register(item.url, [item.method], [
         async (ctx: Router.RouterContext) => {
           const schemaPath = item.responseSchemaPath
