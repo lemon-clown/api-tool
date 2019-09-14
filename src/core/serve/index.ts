@@ -4,7 +4,7 @@ import { GlobalOptions } from '@/types'
 import { logger } from '@/util/logger'
 import { ApiToolServeContext, ApiToolServeContextParams } from './context'
 import { ApiToolMockServer } from './server'
-import { coverBoolean, coverString, coverStringForCliOption, coverNumberForCliOption } from '@/util/option-util'
+import { coverBoolean, coverStringForCliOption, coverNumberForCliOption } from '@/util/option-util'
 import { parseApiToolConfig } from '@/util/config-util'
 export { ApiToolServeContext } from './context'
 export { ApiToolMockServer } from './server'
@@ -44,23 +44,22 @@ export function loadServeCommand (program: commander.Command, globalOptions: Glo
   program
     .command('serve <project-dir>')
     .alias('s')
-    .option('-h, --host <host>', 'specify the ip/domain address to which the mock-server listens.', 'localhost')
-    .option('-p, --port <port>', 'specify the port on which the mock-server listens.', 8080)
-    .option('-s, --schema-root-path <schema-root-path>', 'specify the root directory (absolute or relative to the projectDir) to save schemas.', 'data/schemas')
-    .option('-i, --api-item-config <api-item-config-path>', 'specify the location (absolute or relative to the projectDir) of file contains apiItems.', 'api.yml')
-    .option('-c, --config-path <config-path>', 'specify config file (absolute or relative to the projectDir) to create context params (lower priority)', 'app.yml')
-    .option('--prefix-url <prefix-url>', 'specify the prefix url of routes', '')
-    .option('--required-only', 'json-schema-faker\'s option: if enabled, only required properties will be generated')
-    .option('--always-fake-optionals', 'json-schema-faker\'s option: when enabled, it will set optionalsProbability: 1.0 and fixedProbabilities: true')
-    .option('--optionals-probability <optionalsProbability>', 'json-schema-faker\'s option: a value from 0.0 to 1.0 to generate values in a consistent way', .8)
+    .option('-h, --host <host>', 'specify the ip/domain address to which the mock-server listens.(default: localhost)')
+    .option('-p, --port <port>', 'specify the port on which the mock-server listens.(default: 8080)')
+    .option('-s, --schema-root-path <schemaRootPath>', 'specify the root directory (absolute or relative to the projectDir) to save schemas.(default: data/schemas)')
+    .option('-i, --api-item-config-path <apiItemConfigPath>', 'specify the location (absolute or relative to the projectDir) of file contains apiItems.(default: api.yml)')
+    .option('--prefix-url <prefixUrl>', 'specify the prefix url of routes.(default: \'\')')
+    .option('--required-only', 'json-schema-faker\'s option: if enabled, only required properties will be generated.(default: false)')
+    .option('--always-fake-optionals', 'json-schema-faker\'s option: when enabled, it will set optionalsProbability: 1.0 and fixedProbabilities: true.(default: false)')
+    .option('--optionals-probability <optionalsProbability>', 'json-schema-faker\'s option: a value from 0.0 to 1.0 to generate values in a consistent way(default: .8)')
     .action(async function (projectDir: string, options: ServerOptions) {
       const cwd = globalOptions.cwd.value
       logger.debug('[serve] cwd:', cwd)
       logger.debug('[serve] rawProjectDir:', projectDir)
 
       projectDir = path.resolve(cwd, projectDir)
-      const configPath = path.resolve(projectDir, coverString('app.yml', options.configPath))
-      const contextParams: Partial<ApiToolServeContextParams> = parseApiToolConfig(configPath, 'serve')
+      const contextParams: Partial<ApiToolServeContextParams> = parseApiToolConfig(projectDir, globalOptions).serve || {}
+      logger.debug('[serve] contextParams:', contextParams)
 
       // 计算路径
       const resolvePath = (key: keyof Pick<ApiToolServeContextParams, 'schemaRootPath' | 'apiItemConfigPath'>, defaultValue: string): string => {
@@ -80,7 +79,6 @@ export function loadServeCommand (program: commander.Command, globalOptions: Glo
 
       logger.debug('[serve] encoding:', encoding)
       logger.debug('[serve] projectDir:', projectDir)
-      logger.debug('[serve] configPath:', configPath)
       logger.debug('[serve] host:', host)
       logger.debug('[serve] port:', port)
       logger.debug('[serve] prefixUrl:', prefixUrl)

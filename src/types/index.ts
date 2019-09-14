@@ -17,4 +17,6 @@ interface OptionItem<T> {
 export interface GlobalOptions {
   cwd: OptionItem<string>
   encoding: OptionItem<string>
+  configPath: OptionItem<string>
+  logLevel: OptionItem<string>
 }

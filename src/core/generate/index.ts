@@ -3,7 +3,7 @@ import commander from 'commander'
 import { GlobalOptions } from '@/types'
 import { logger } from '@/util/logger'
 import { isNotBlankString } from '@/util/type-util'
-import { coverBoolean, coverString, coverStringForCliOption } from '@/util/option-util'
+import { coverBoolean, coverStringForCliOption } from '@/util/option-util'
 import { parseApiToolConfig } from '@/util/config-util'
 import { ApiToolGeneratorContext, ApiToolGeneratorContextParams } from './context'
 import { ApiToolGenerator } from './generator'
@@ -34,11 +34,10 @@ export function loadGenerateCommand (program: commander.Command, globalOptions: 
   program
     .command('generate <project-dir>')
     .alias('g')
-    .option('-p, --tsconfig-path <tsconfig-path>', 'specify the location (absolute or relative to the projectDir) of typescript config file.', 'tsconfig.json')
-    .option('-s, --schema-root-path <schema-root-path>', 'specify the root directory (absolute or relative to the projectDir) to save schemas.', 'data/schemas')
-    .option('-i, --api-item-config <api-item-config-path>', 'specify the location (absolute or relative to the projectDir) of file contains apiItems.', 'api.yml')
-    .option('-c, --config-path <config-path>', 'specify config file (absolute or relative to the projectDir) to create context params (lower priority)', 'app.yml')
-    .option('-I, --ignore-missing-models', 'ignore missing model')
+    .option('-p, --tsconfig-path <tsconfigPath>', 'specify the location (absolute or relative to the projectDir) of typescript config file.(default: tsconfig.json)')
+    .option('-s, --schema-root-path <schemaRootPath>', 'specify the root directory (absolute or relative to the projectDir) to save schemas.(default: data/schemas)')
+    .option('-i, --api-item-config-path <apiItemConfigPath>', 'specify the location (absolute or relative to the projectDir) of file contains apiItems.(default: api.yml)')
+    .option('-I, --ignore-missing-models', 'ignore missing model.(default: false)')
     .action(async function (projectDir: string, options: GenerateOptions) {
       const cwd = globalOptions.cwd.value
 
@@ -46,8 +45,9 @@ export function loadGenerateCommand (program: commander.Command, globalOptions: 
       logger.debug('[generate] rawProjectDir:', projectDir)
 
       projectDir = path.resolve(cwd, projectDir)
-      const configPath = path.resolve(projectDir, coverString('app.yml', options.configPath))
-      const contextParams: Partial<ApiToolGeneratorContextParams> = parseApiToolConfig(configPath, 'serve')
+      const contextParams: Partial<ApiToolGeneratorContextParams> = parseApiToolConfig(projectDir, globalOptions).generate || {}
+      logger.debug('[generate] contextParams:', contextParams)
+
       // 计算路径
       const resolvePath = (key: keyof Pick<ApiToolGeneratorContextParams, 'tsconfigPath' | 'schemaRootPath' | 'apiItemConfigPath'>, defaultValue: string): string => {
         const value = coverStringForCliOption(defaultValue, contextParams[key], options[key])
@@ -64,7 +64,6 @@ export function loadGenerateCommand (program: commander.Command, globalOptions: 
 
       logger.debug('[generate] encoding:', encoding)
       logger.debug('[generate] projectDir:', projectDir)
-      logger.debug('[generate] configPath:', configPath)
       logger.debug('[generate] tsconfigPath:', tsconfigPath)
       logger.debug('[generate] schemaRootPath:', schemaRootPath)
       logger.debug('[generate] apiItemConfigPath:', apiItemConfigPath)
