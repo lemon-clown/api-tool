@@ -3,12 +3,13 @@ import { ApiToolMockServer, ApiToolServeContext } from '@/core/serve'
 
 
 async function debug() {
+  const projectDir: string = path.resolve('demo/simple')
   const apiToolServeContext = new ApiToolServeContext({
     host: 'localhost',
     port: 8080,
-    projectDir: path.resolve('demo/simple'),
-    schemaRootPath: path.resolve('demo/simple/data/schemas'),
-    apiItemConfigPath: path.resolve('demo/simple/api.yml'),
+    projectDir,
+    schemaRootPath: path.join(projectDir, 'data/schemas'),
+    apiItemConfigPath: path.join(projectDir, 'api.yml'),
   })
 
   const server = new ApiToolMockServer(apiToolServeContext)
