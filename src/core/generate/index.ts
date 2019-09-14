@@ -37,7 +37,7 @@ export function loadGenerateCommand (program: commander.Command, globalOptions: 
     .option('-s, --schema-root-path <schema-root-path>', 'specify the root directory (absolute or relative to the projectDir) to save schemas.', 'data/schemas')
     .option('-i, --api-item-config <api-item-config-path>', 'specify the location (absolute or relative to the projectDir) of file contains apiItems.', 'api.yml')
     .option('-c, --config <config-path>', 'specify generate-config.json (absolute or relative to the projectDir) to create context params (lower priority)', 'api-generate-config.json')
-    .option('-I, --ignore-missing-models', 'ignore missing model', 'false')
+    .option('-I, --ignore-missing-models', 'ignore missing model')
     .action(async function (projectDir: string, options: GenerateOptions) {
       const cwd = globalOptions.cwd.value
 
