@@ -30,7 +30,7 @@
     "@types/koa-router": "^7.0.42",
     "@types/mockjs": "^1.0.2",
     "@types/node": "^12.7.3",
-    "colorful-chalk-logger": "^0.3.2",
+    "colorful-chalk-logger": "^0.4.1",
     "commander": "^3.0.1",
     "fs-extra": "^8.1.0",
     "js-yaml": "^3.13.1",
