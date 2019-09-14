@@ -19,6 +19,11 @@ export class ApiToolMockServer {
 
   public constructor (context: ApiToolServeContext) {
     this.context = context
+    jsf.option({
+      requiredOnly: context.requiredOnly,
+      alwaysFakeOptionals: context.alwaysFakeOptionals,
+      optionalsProbability: context.optionalsProbability,
+    })
   }
 
   public async start(): Promise<void> {
