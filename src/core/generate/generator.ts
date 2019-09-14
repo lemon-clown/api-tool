@@ -30,6 +30,7 @@ export class ApiToolGenerator {
       }
 
       const model: TJS.Definition = context.generator.getSchemaForSymbol(modelName)
+      if (model.title == null) model.title = modelName
       const data = JSON.stringify(model, null, 2)
       const dirname = path.dirname(filepath)
       if (!fs.existsSync(dirname)) fs.mkdirpSync(dirname)

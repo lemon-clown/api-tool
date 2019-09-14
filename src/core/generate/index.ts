@@ -45,7 +45,7 @@ export function loadGenerateCommand (program: commander.Command, globalOptions: 
       logger.debug('[generate] rawProjectDir:', projectDir)
 
       projectDir = path.resolve(cwd, projectDir)
-      const resolvePath = (key: keyof Omit<GenerateOptions, 'ignoreMissingModels'>, defaultValue: string) => {
+      const resolvePath = (key: keyof Pick<GenerateOptions, 'configPath' | 'tsconfigPath' | 'schemaRootPath' | 'apiItemConfigPath'>, defaultValue: string) => {
         if (isNotBlankString(options[key])) return path.resolve(projectDir, options[key])
         return path.resolve(projectDir, defaultValue)
       }
