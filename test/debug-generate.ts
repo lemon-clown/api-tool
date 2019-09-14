@@ -6,10 +6,11 @@ let running = false
 async function debug() {
   if (running) return
   running = true
+  const projectDir: string = path.resolve('demo/simple')
   const apiToolGeneratorContext = new ApiToolGeneratorContext({
-    tsconfigPath: path.resolve('demo/simple/tsconfig.json'),
-    schemaRootPath: path.resolve('demo/simple/data/schemas'),
-    apiItemConfigPath: path.resolve('demo/simple/api.yml'),
+    tsconfigPath: path.join(projectDir, 'tsconfig.json'),
+    schemaRootPath: path.join(projectDir, 'data/schemas'),
+    apiItemConfigPath: path.join(projectDir, 'api.yml'),
     schemaArgs: {
       ref: false,
       required: true,
