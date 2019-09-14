@@ -1,4 +1,5 @@
 import fs from 'fs-extra'
+import yaml from 'js-yaml'
 import { logger } from './logger'
 
 
@@ -69,4 +70,19 @@ export function ensureFilePathSync(p: string | null): void | never {
   if (isFileSync(p)) return
   logger.error(`${ p } is not a file.`)
   process.exit(-1)
+}
+
+
+
+export function loadConfigDataSync(configPath: string, encoding: string): any | never {
+  const rawContent: string = fs.readFileSync(configPath, encoding)
+
+  // json format
+  if (/\.json$/.test(configPath)) return JSON.parse(rawContent)
+
+  // yaml format
+  if (/\.(yml|yaml)$/.test(configPath)) return yaml.safeLoad(rawContent)
+
+  // unsupported config file
+  throw new Error(`${ configPath } must be a file which the extension is .json/.yml/.yaml`)
 }

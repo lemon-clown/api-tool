@@ -1,9 +1,8 @@
-import fs from 'fs-extra'
 import path from 'path'
-import yaml from 'js-yaml'
 import { isNotBlankString } from '@/util/type-util'
 import { coverString, cover } from '@/util/option-util'
 import { convertToCamel, convertToKebab } from '@/util/string-util'
+import { loadConfigDataSync } from '@/util/fs-util'
 import { HttpVerb, ApiItem, ApiItemGroup, RawApiItemGroup, RawApiItem } from './types'
 
 
@@ -56,30 +55,32 @@ export class ApiItemParser {
   }
 
   /**
-   * 从 api 配置文件中加载数据
+   * 从 api 配置文件中加载 ApiItems
    *
-   * @param configPath  .json/.yml/.yaml 后缀的文件
-   * @param encoding
+   * @param {string} configPath             .json/.yml/.yaml 后缀的文件
+   * @param {*} [encoding=this.encoding]    文件编码格式
+   * @returns {ApiItem[]}
+   * @memberof ApiItemParser
    */
   public loadFromApiConfig(configPath: string, encoding = this.encoding): ApiItem[] {
-    const rawContent: string = fs.readFileSync(configPath, encoding)
-    let content: any
-    if (/\.json$/.test(configPath)) {               // json 格式
-      content = JSON.parse(rawContent)
-    }
-    else if (/\.(yml|yaml)$/.test(configPath)) {    // yaml 格式
-      content = yaml.safeLoad(rawContent)
-    } else {
-      throw new Error(`${ configPath } must be a file which the extension is .json/.yml/.yaml`)
-    }
+    const content: any = loadConfigDataSync(configPath, encoding)
+    return this.parseFromConfigContent(content)
+  }
 
-    const rawApiItemGroups: RawApiItemGroup[] = this.extractRawApiItemGroups(content)
-    const items: ApiItem[] = []
-    for (const rawApiItemGroup of rawApiItemGroups) {
-      items.push(...this.parseFromRowItemGroup(rawApiItemGroup))
-    }
-    return items
- }
+
+  /**
+   * 从主配置文件中加载 ApiItems
+   *
+   * @param {string} configPath               .json/.yml/.yaml 后缀的文件
+   * @param {string} [apiKey='api']           api-items 在配置文件中的顶级键名
+   * @param {*} [encoding=this.encoding]      文件编码格式
+   * @memberof ApiItemParser
+   */
+  public loadFromMainConfig (configPath: string, apiKey = 'api', encoding= this.encoding): ApiItem[] {
+    const content: any = loadConfigDataSync(configPath, encoding)
+    if (content == null || typeof content !== 'object') return []
+    return this.parseFromConfigContent(content[apiKey])
+  }
 
   /**
    * 从 RowItemGroup 中解析出 api 条目列表；该结果将收集进 this.items
@@ -150,12 +151,30 @@ export class ApiItemParser {
     return apiItems
   }
 
+
+  /**
+   * 从配置文件的内容中解析出 ApiItem 列表
+   *
+   * @private
+   * @param {*} content
+   * @returns {ApiItem[]}
+   * @memberof ApiItemParser
+   */
+  private parseFromConfigContent (content: any): ApiItem[] {
+    const rawApiItemGroups: RawApiItemGroup[] = this.extractRawApiItemGroups(content)
+    const items: ApiItem[] = []
+    for (const rawApiItemGroup of rawApiItemGroups) {
+      items.push(...this.parseFromRowItemGroup(rawApiItemGroup))
+    }
+    return items
+  }
+
   /**
    * 将对象解析为 RawApiItemGroup 列表
    * @param data
    */
   private extractRawApiItemGroups(data: any): RawApiItemGroup[] {
-    if (typeof data !== 'object') return []
+    if (data == null || typeof data !== 'object') return []
     const rawApiItemGroups: RawApiItemGroup[] = []
     for (const [groupName, rawGroup] of Object.entries<RawApiItemGroup>(data)) {
       const items: RawApiItem[] = this.extractRawApiItems(rawGroup.items)
@@ -174,7 +193,7 @@ export class ApiItemParser {
    * @param data
    */
   private extractRawApiItems(data: any): RawApiItem[] {
-    if (typeof data !== 'object') return []
+    if (data == null || typeof data !== 'object') return []
     const rawApiItems: RawApiItem[] = []
     for (const [name, rawItem] of Object.entries<RawApiItem>(data)) {
       const { url, desc, method, model, requestModel, responseModel, requestSchemaPath, responseSchemaPath } = rawItem

@@ -45,7 +45,7 @@ export function parseApiToolGeneratorContextParams(contextParamsConfigPath: stri
 
   try {
     const obj: any = fs.readJSONSync(contextParamsConfigPath)
-    if (typeof obj !== 'object') return {}
+    if (obj == null || typeof obj !== 'object') return {}
     const { tsconfigPath, schemaRootPath, apiItemConfigPath, cwd, encoding, schemaArgs, additionalCompilerOptions, ignoreMissingModels } = obj
     return { tsconfigPath, schemaRootPath, apiItemConfigPath, cwd, encoding, schemaArgs, additionalCompilerOptions, ignoreMissingModels }
   } catch (error) {
