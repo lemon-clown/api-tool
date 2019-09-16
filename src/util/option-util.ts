@@ -131,3 +131,23 @@ export function coverNumberForCliOption(
   if (limits.maxValue != null) value = Math.min(limits.maxValue, value)
   return value
 }
+
+
+
+/**
+ * 优先 optionValue，其次 configValue，其次 defaultValue
+ *
+ * @export
+ * @param {boolean} defaultValue
+ * @param {*} [configValue]
+ * @param {*} [cliValue]
+ * @returns {boolean}
+ */
+export function coverBooleanForCliOption(
+  defaultValue: boolean,
+  configValue?: any,
+  cliValue?: any
+): boolean {
+  const value = coverBoolean(configValue, cliValue)
+  return coverBoolean(defaultValue, value)
+}

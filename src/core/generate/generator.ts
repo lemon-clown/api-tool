@@ -39,6 +39,11 @@ export class ApiToolGenerator {
       tasks.push(task)
     }
 
+    // 在生成 JSON-SCHEMA 前，做一些清理操作
+    if (context.clean) {
+      await this.clear()
+    }
+
     for (const item of context.apiItems) {
       // RequestData
       if (item.requestModel != null) {
@@ -50,5 +55,14 @@ export class ApiToolGenerator {
         doTask(item.responseModel, item.responseSchemaPath)
       }
     }
+  }
+
+  /**
+   * 清空 JSON-SCHEMA 所在的目录
+   */
+  public async clear(): Promise<void> {
+    const targetDirectory = this.context.schemaRootPath
+    logger.info(`clearing schemas root path: ${ targetDirectory }.`)
+    await fs.remove(targetDirectory)
   }
 }

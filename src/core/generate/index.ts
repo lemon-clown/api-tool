@@ -3,7 +3,7 @@ import commander from 'commander'
 import { GlobalOptions } from '@/types'
 import { logger } from '@/util/logger'
 import { isNotBlankString } from '@/util/type-util'
-import { coverBoolean, coverStringForCliOption } from '@/util/option-util'
+import { coverStringForCliOption, coverBooleanForCliOption } from '@/util/option-util'
 import { parseApiToolConfig } from '@/util/config-util'
 import { ApiToolGeneratorContext, ApiToolGeneratorContextParams } from './context'
 import { ApiToolGenerator } from './generator'
@@ -20,6 +20,7 @@ export { ApiToolGenerator } from './generator'
  * @member configPath           json 格式的配置文件，通过此文件构造 ApiToolGeneratorContextParams（低优先级）；
  *                              此配置文件内容与 ApiToolGeneratorContextParams 类型保持一直，用来指定改变 generator 行为的参数
  * @member ignoreMissingModels  忽略未找到的模型
+ * @member clean                若为 true，则在生成 JSON-SCHEMA 之前，清空新生成 JSON-SCHEMA 待存放的文件夹
  */
 export interface GenerateOptions {
   tsconfigPath: string
@@ -27,6 +28,7 @@ export interface GenerateOptions {
   apiItemConfigPath: string
   configPath: string
   ignoreMissingModels: boolean
+  clean: boolean
 }
 
 
@@ -38,6 +40,7 @@ export function loadGenerateCommand (program: commander.Command, globalOptions: 
     .option('-s, --schema-root-path <schemaRootPath>', 'specify the root directory (absolute or relative to the projectDir) to save schemas.(default: data/schemas)')
     .option('-i, --api-item-config-path <apiItemConfigPath>', 'specify the location (absolute or relative to the projectDir) of file contains apiItems.(default: api.yml)')
     .option('-I, --ignore-missing-models', 'ignore missing model.(default: false)')
+    .option('--clean', 'clean schema folders before generate.(default: false)')
     .action(async function (projectDir: string, options: GenerateOptions) {
       const cwd = globalOptions.cwd.value
 
@@ -55,15 +58,17 @@ export function loadGenerateCommand (program: commander.Command, globalOptions: 
         return path.resolve(projectDir, value)
       }
 
+      const clean = coverBooleanForCliOption(false, contextParams.clean, options.clean)
       const tsconfigPath = resolvePath('tsconfigPath', contextParams.tsconfigPath || 'tsconfig.json')
       const schemaRootPath = resolvePath('schemaRootPath', contextParams.schemaRootPath || 'data/schemas')
       const apiItemConfigPath = resolvePath('apiItemConfigPath', contextParams.apiItemConfigPath || 'api.yml')
       const mainConfigPath = globalOptions.configPath.value
-      const ignoreMissingModels = coverBoolean(false, coverBoolean(contextParams.ignoreMissingModels!, options.ignoreMissingModels))
+      const ignoreMissingModels = coverBooleanForCliOption(false, contextParams.ignoreMissingModels, options.ignoreMissingModels)
       const encoding = !globalOptions.encoding.userSpecified && isNotBlankString(contextParams.encoding)
         ? contextParams.encoding!
         : globalOptions.encoding.value
 
+      logger.debug('[generate] clean:', clean)
       logger.debug('[generate] encoding:', encoding)
       logger.debug('[generate] projectDir:', projectDir)
       logger.debug('[generate] tsconfigPath:', tsconfigPath)
@@ -76,6 +81,7 @@ export function loadGenerateCommand (program: commander.Command, globalOptions: 
       const context = new ApiToolGeneratorContext({
         ...contextParams,
         cwd,
+        clean,
         encoding,
         tsconfigPath,
         schemaRootPath,

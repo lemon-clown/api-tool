@@ -15,6 +15,7 @@ import { isNotBlankString } from '@/util/type-util'
  * @member ignoreMissingModels        忽略未找到的模型
  * @member apiItemConfigPath          定义 ApiItems 的文件路径（yaml 格式）
  * @member mainConfigPath             主配置文件所在的路径（通过 --config-path 选项指定的路径）
+ * @member clean                      若为 true，则在生成 JSON-SCHEMA 之前，清空新生成 JSON-SCHEMA 待存放的文件夹
  * @member encoding                   目标工程的文件编码（简单起见，只考虑所有的源码使用同一种编码格式）
  * @member additionalSchemaArgs       额外的构建 Schema 的选项
  * @member additionalCompilerOptions  额外的 CompilerOptions 选项
@@ -25,6 +26,7 @@ export interface ApiToolGeneratorContextParams {
   apiItemConfigPath: string
   ignoreMissingModels: boolean
   mainConfigPath?: string
+  clean?: boolean
   cwd?: string
   encoding?: string
   schemaArgs?: TJS.PartialArgs
@@ -51,6 +53,7 @@ export class ApiToolGeneratorContext {
   public readonly apiItems: ApiItem[]
   public readonly encoding: string
   public readonly ignoreMissingModels: boolean
+  public readonly clean: boolean
   public readonly program: ts.Program
   public readonly generator: TJS.JsonSchemaGenerator
 
@@ -64,7 +67,8 @@ export class ApiToolGeneratorContext {
       mainConfigPath,
       tsconfigPath,
       schemaArgs,
-      additionalCompilerOptions
+      additionalCompilerOptions,
+      clean = false,
     } = params
 
     // ensure tsconfigPath is valid.
@@ -75,6 +79,7 @@ export class ApiToolGeneratorContext {
     this.ignoreMissingModels = ignoreMissingModels
     this.projectRootPath = path.resolve(this.cwd, path.dirname(tsconfigPath))
     this.schemaRootPath = path.resolve(this.projectRootPath, schemaRootPath)
+    this.clean = clean
 
     const apiItemParser = new ApiItemParser({
       schemaRootPath: this.schemaRootPath,
