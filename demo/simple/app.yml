@@ -1,0 +1,32 @@
+globalOptions:
+  encoding: utf-8
+  logLevel: debug
+
+generate:
+  ignoreMissingModels: true
+  tsconfigPath: tsconfig.json
+  apiItemConfigPath: api.yml
+  schemaArgs:
+    ref: false,
+    required: true
+
+serve:
+  host: '127.0.0.1'
+  port: 8091
+  prefixUrl: /mock
+  apiItemConfigPath: api.yml
+  optionalsProbability: 0.7
+
+api:
+  user:
+    url: /api/user
+    method: GET
+    model: User
+    items:
+      query:
+        url: /:username
+        desc: get user data by username
+      update:
+        url: /:username
+        method: POST
+        desc: update user info

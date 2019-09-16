@@ -1,12 +1,14 @@
+import { ResponseCode } from './response-code'
+
+
 /**
  * response data
  */
-export interface ResponseData<T> {
+export interface ResponseData<T = undefined> {
   /**
    * response code
-   * @TJS-type integer
    */
-  code: number
+  code: ResponseCode
   /**
    * response message
    */

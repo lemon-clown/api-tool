@@ -3,14 +3,13 @@ import { User } from './user'
 
 
 /**
- * request data of /api/user/:username
+ * response of /api/user/:username
  */
-export interface GetUserRequestVo {
-  username: string
-}
+export type UserQueryResponseVo = ResponseData<User>
 
 
 /**
- * response of /api/user/:username
+ * request/response of /api/user/me
  */
-export type GetUserResponseVo = ResponseData<User>
+export type UserUpdateRequestVo = User
+export type UserUpdateResponseVo = ResponseData<User>
