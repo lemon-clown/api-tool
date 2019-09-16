@@ -73,6 +73,7 @@ export function loadServeCommand (program: commander.Command, globalOptions: Glo
       const encoding = globalOptions.encoding.value
       const schemaRootPath = resolvePath('schemaRootPath', 'data/schemas')
       const apiItemConfigPath = resolvePath('apiItemConfigPath', 'api.yml')
+      const mainConfigPath = globalOptions.configPath.value
       const requiredOnly = coverBoolean(false, options.requiredOnly)
       const alwaysFakeOptionals = coverBoolean(false, options.alwaysFakeOptionals)
       const optionalsProbability: number = coverNumberForCliOption(.8, contextParams.optionalsProbability, options.optionalsProbability)
@@ -95,6 +96,7 @@ export function loadServeCommand (program: commander.Command, globalOptions: Glo
         projectDir,
         schemaRootPath,
         apiItemConfigPath,
+        mainConfigPath,
         encoding,
         requiredOnly,
         alwaysFakeOptionals,

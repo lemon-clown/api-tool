@@ -1,5 +1,7 @@
+import fs from 'fs-extra'
 import path from 'path'
 import { ApiItem, ApiItemParser } from '@/core/api-item'
+import { isNotBlankString } from '@/util/type-util'
 
 
 /**
@@ -10,6 +12,7 @@ import { ApiItem, ApiItemParser } from '@/core/api-item'
  * @member projectDir           待处理的目标工程路径（传进来的参数中，tsconfigPath 所在的目录）
  * @member schemaRootPath       生成的 Json-Schema 存放的文件夹（绝对路径或相对于 tsconfig.json 所在的路径）
  * @member apiItemConfigPath    定义 ApiItems 的文件路径（yaml 格式）
+ * @member mainConfigPath       主配置文件所在的路径（通过 --config-path 选项指定的路径）
  * @member encoding             目标工程的文件编码（简单起见，只考虑所有的源码使用同一种编码格式）
  * @member requiredOnly         是否只返回 JSON-SCHEMA 中 required 的属性
  * @member alwaysFakeOptionals  是否始终都返回所有的非 required 的属性
@@ -21,6 +24,7 @@ export interface ApiToolServeContextParams {
   projectDir: string
   schemaRootPath: string
   apiItemConfigPath: string
+  mainConfigPath?: string
   requiredOnly?: boolean
   alwaysFakeOptionals?: boolean
   optionalsProbability?: number
@@ -68,10 +72,12 @@ export class ApiToolServeContext {
       projectDir,
       schemaRootPath,
       apiItemConfigPath,
+      mainConfigPath,
       optionalsProbability = .8,
       requiredOnly = false,
       alwaysFakeOptionals = false,
     } = params
+
     this.cwd = cwd
     this.host = host
     this.port = port
@@ -87,7 +93,17 @@ export class ApiToolServeContext {
       schemaRootPath: this.schemaRootPath,
       encoding: this.encoding
     })
-    apiItemParser.loadFromApiConfig(apiItemConfigPath)
+
+
+    // 从主配置文件中加载 api-items
+    if (isNotBlankString(mainConfigPath) && fs.existsSync(mainConfigPath!)) {
+      apiItemParser.loadFromMainConfig(mainConfigPath!)
+    }
+
+    // 从 api 文件中加载 api-items
+    if (isNotBlankString(apiItemConfigPath) && fs.existsSync(apiItemConfigPath)) {
+      apiItemParser.loadFromApiConfig(apiItemConfigPath)
+    }
     this.apiItems = apiItemParser.collect()
   }
 }

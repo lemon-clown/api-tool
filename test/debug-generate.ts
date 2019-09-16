@@ -11,6 +11,7 @@ async function debug() {
     tsconfigPath: path.join(projectDir, 'tsconfig.json'),
     schemaRootPath: path.join(projectDir, 'data/schemas'),
     apiItemConfigPath: path.join(projectDir, 'api.yml'),
+    mainConfigPath: path.join(projectDir, 'app.yml'),
     ignoreMissingModels: true,
     schemaArgs: {
       ref: false,

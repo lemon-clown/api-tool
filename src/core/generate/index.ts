@@ -45,7 +45,8 @@ export function loadGenerateCommand (program: commander.Command, globalOptions: 
       logger.debug('[generate] rawProjectDir:', projectDir)
 
       projectDir = path.resolve(cwd, projectDir)
-      const contextParams: Partial<ApiToolGeneratorContextParams> = parseApiToolConfig(projectDir, globalOptions).generate || {}
+      const configData = parseApiToolConfig(projectDir, globalOptions)
+      const contextParams: Partial<ApiToolGeneratorContextParams> = configData.generate || {}
       logger.debug('[generate] contextParams:', contextParams)
 
       // 计算路径
@@ -57,6 +58,7 @@ export function loadGenerateCommand (program: commander.Command, globalOptions: 
       const tsconfigPath = resolvePath('tsconfigPath', contextParams.tsconfigPath || 'tsconfig.json')
       const schemaRootPath = resolvePath('schemaRootPath', contextParams.schemaRootPath || 'data/schemas')
       const apiItemConfigPath = resolvePath('apiItemConfigPath', contextParams.apiItemConfigPath || 'api.yml')
+      const mainConfigPath = globalOptions.configPath.value
       const ignoreMissingModels = coverBoolean(false, coverBoolean(contextParams.ignoreMissingModels!, options.ignoreMissingModels))
       const encoding = !globalOptions.encoding.userSpecified && isNotBlankString(contextParams.encoding)
         ? contextParams.encoding!
@@ -78,6 +80,7 @@ export function loadGenerateCommand (program: commander.Command, globalOptions: 
         tsconfigPath,
         schemaRootPath,
         apiItemConfigPath,
+        mainConfigPath,
         ignoreMissingModels,
       })
       const generator = new ApiToolGenerator(context)

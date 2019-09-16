@@ -1,9 +1,11 @@
+import fs from 'fs-extra'
 import path from 'path'
 import ts from 'typescript'
 import * as TJS from '@lemon-clown/typescript-json-schema'
 import { ApiItem, ApiItemParser } from '@/core/api-item'
 import { logger } from '@/util/logger'
 import { ensureFilePathSync } from '@/util/fs-util'
+import { isNotBlankString } from '@/util/type-util'
 
 
 /**
@@ -12,6 +14,7 @@ import { ensureFilePathSync } from '@/util/fs-util'
  * @member schemaRootPath             生成的 Json-Schema 存放的文件夹（绝对路径或相对于 tsconfig.json 所在的路径）
  * @member ignoreMissingModels        忽略未找到的模型
  * @member apiItemConfigPath          定义 ApiItems 的文件路径（yaml 格式）
+ * @member mainConfigPath             主配置文件所在的路径（通过 --config-path 选项指定的路径）
  * @member encoding                   目标工程的文件编码（简单起见，只考虑所有的源码使用同一种编码格式）
  * @member additionalSchemaArgs       额外的构建 Schema 的选项
  * @member additionalCompilerOptions  额外的 CompilerOptions 选项
@@ -21,12 +24,12 @@ export interface ApiToolGeneratorContextParams {
   schemaRootPath: string
   apiItemConfigPath: string
   ignoreMissingModels: boolean
+  mainConfigPath?: string
   cwd?: string
   encoding?: string
   schemaArgs?: TJS.PartialArgs
   additionalCompilerOptions?: ts.CompilerOptions
 }
-
 
 
 /**
@@ -58,6 +61,7 @@ export class ApiToolGeneratorContext {
       ignoreMissingModels,
       schemaRootPath,
       apiItemConfigPath,
+      mainConfigPath,
       tsconfigPath,
       schemaArgs,
       additionalCompilerOptions
@@ -77,9 +81,17 @@ export class ApiToolGeneratorContext {
       encoding: this.encoding,
     })
 
-    apiItemParser.loadFromApiConfig(apiItemConfigPath)
-    this.apiItems = apiItemParser.collect()
+    // 从主配置文件中加载 api-items
+    if (isNotBlankString(mainConfigPath) && fs.existsSync(mainConfigPath!)) {
+      apiItemParser.loadFromMainConfig(mainConfigPath!)
+    }
 
+    // 从 api 文件中加载 api-items
+    if (isNotBlankString(apiItemConfigPath) && fs.existsSync(apiItemConfigPath)) {
+      apiItemParser.loadFromApiConfig(apiItemConfigPath)
+    }
+
+    this.apiItems = apiItemParser.collect()
     if (this.apiItems.length <= 0) {
       logger.debug('[ApiToolGeneratorContext.constructor] params:', params)
       throw new Error('no valid api item found.')

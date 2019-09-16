@@ -10,6 +10,7 @@ async function debug() {
     projectDir,
     schemaRootPath: path.join(projectDir, 'data/schemas'),
     apiItemConfigPath: path.join(projectDir, 'api.yml'),
+    mainConfigPath: path.join(projectDir, 'app.yml'),
   })
 
   const server = new ApiToolMockServer(apiToolServeContext)

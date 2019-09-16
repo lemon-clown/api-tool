@@ -30,6 +30,20 @@ export function loadConfigDataSync(configPath: string, encoding: string): any | 
 
 
 /**
+ * 命令工具的配置信息
+ *
+ * @member generate   apit generate 子命令的参数选项
+ * @member serve      apit serve 子命令的参数选项
+ * @member api        api 条目信息
+ */
+export interface ApiToolConfigData {
+  generate: any
+  serve: any
+  api: any
+}
+
+
+/**
  * 加载工具的配置文件，并更新全局选项；可多次调用
  *
  *  - 如果用户未指定配置文件，且配置文件不存在，则跳过；
@@ -40,10 +54,7 @@ export function loadConfigDataSync(configPath: string, encoding: string): any | 
  * @param {GlobalOptions} globalOptions
  * @returns {Partial<{ generate: any, serve: any, api: any }>}
  */
-export function parseApiToolConfig(
-  projectDir: string,
-  globalOptions: GlobalOptions,
-): Partial<{ generate: any, serve: any, api: any }> {
+export function parseApiToolConfig(projectDir: string, globalOptions: GlobalOptions): Partial<ApiToolConfigData> {
   const configPath: string = path.resolve(projectDir, globalOptions.configPath.value)
   if (!fs.existsSync(configPath)) {
     if (globalOptions.configPath.userSpecified) {
