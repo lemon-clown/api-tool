@@ -1,9 +1,11 @@
+import fs from 'fs-extra'
 import path from 'path'
 import { isNotBlankString } from '@/util/type-util'
 import { coverString, cover } from '@/util/option-util'
 import { convertToCamel, convertToKebab } from '@/util/string-util'
 import { loadConfigDataSync } from '@/util/config-util'
 import { HttpVerb, ApiItem, ApiItemGroup, RawApiItemGroup, RawApiItem } from './types'
+import { logger } from '@/util/logger'
 
 
 /**
@@ -52,6 +54,24 @@ export class ApiItemParser {
    */
   public collect(): ApiItem[] {
     return [...this.items]
+  }
+
+  /**
+   * 加载当前工程下可以定义 api-item 的配置文件，并提取出 api-item 列表
+   * @param mainConfigPath      主配置文件
+   * @param apiItemConfigPath   api 配置文件
+   * @param encoding
+   */
+  public loadFromCurrentProjectConfig(mainConfigPath: string, apiItemConfigPath: string, encoding = this.encoding) {
+    // 从主配置文件中加载 api-items
+    if (isNotBlankString(mainConfigPath) && fs.existsSync(mainConfigPath!)) {
+      this.loadFromMainConfig(mainConfigPath!, encoding)
+    }
+
+    // 从 api 文件中加载 api-items
+    if (isNotBlankString(apiItemConfigPath) && fs.existsSync(apiItemConfigPath)) {
+      this.loadFromApiConfig(apiItemConfigPath)
+    }
   }
 
   /**
@@ -147,10 +167,9 @@ export class ApiItemParser {
       apiItems.push(apiItem)
     }
 
-    this.items.push(...apiItems)
+    apiItems.forEach(apiItem => this.addApiItem(apiItem))
     return apiItems
   }
-
 
   /**
    * 从配置文件的内容中解析出 ApiItem 列表
@@ -204,5 +223,18 @@ export class ApiItemParser {
       rawApiItems.push(rawApiItem)
     }
     return rawApiItems
+  }
+
+  /**
+   * 添加 apiItem 条目（去重）
+   * @param apiItem
+   */
+  private addApiItem (apiItem: ApiItem) {
+    const existsApiItem = this.items.find(item => item.method === apiItem.method && item.url === apiItem.url)
+    if (existsApiItem != null) {
+      logger.warn(`duplicated api-items: method(${ apiItem.method }) url(${ apiItem.url }). skipped`)
+      return
+    }
+    this.items.push(apiItem)
   }
 }
