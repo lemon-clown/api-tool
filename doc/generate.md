@@ -31,6 +31,7 @@
   * `-i, --api-item-config-path <apiItemConfigPath>`:
     - 指定 api 条目的配置文件，需以 `.json` 或 `.yml` 或 `.yaml` 为后缀
     - 绝对路径或相对于 `projectDir` 的路径
+    - 可见 [apiItemConfig][]
     - 默认值： `api.yml`
 
   * `-I, --ignore-missing-models`:
@@ -44,3 +45,4 @@
   * `--help`: 打印帮助信息
 
 [typescript-json-schema]: https://github.com/YousefED/typescript-json-schema
+[apiItemConfig]: ./README.md#apiItemConfig

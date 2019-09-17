@@ -37,6 +37,7 @@
   * `-i, --api-item-config-path <apiItemConfigPath>`:
     - 指定 api 条目的配置文件
     - 绝对路径或相对于 `projectDir` 的路径
+    - 可见 [apiItemConfig][]
     - 默认值： `api.yml`
 
   * `--required-only`:
@@ -58,3 +59,4 @@
 
 [typescript-json-schema]: https://github.com/YousefED/typescript-json-schema
 [json-schema-faker:doc]: https://github.com/json-schema-faker/json-schema-faker/blob/master/docs/USAGE.md#supported-keywords
+[apiItemConfig]: ./README.md#apiItemConfig
