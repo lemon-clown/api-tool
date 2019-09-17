@@ -1,0 +1,4 @@
+{
+  "watch": ["model/", "app.yml", "api.yml"],
+  "ext": "ts yml yaml json"
+}

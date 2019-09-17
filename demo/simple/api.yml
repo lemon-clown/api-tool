@@ -1,0 +1,12 @@
+user:
+  url: /api/user
+  method: GET
+  model: User
+  items:
+    query:
+      url: /:username
+      desc: get user data by username
+    update:
+      url: /:username
+      method: POST
+      desc: update user info

@@ -1,0 +1,13 @@
+{
+  "name": "api-tool-simple-demo",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build:schemas": "apit generate . -c app.yml",
+    "serve": "nodemon --exec \"yarn build:schemas && apit serve .\""
+  },
+  "devDependencies": {
+    "api-tool": "^0.0.1",
+    "nodemon": "^1.19.1"
+  }
+}

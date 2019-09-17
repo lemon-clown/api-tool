@@ -3,6 +3,7 @@ globalOptions:
   logLevel: debug
 
 generate:
+  clean: true
   ignoreMissingModels: true
   tsconfigPath: tsconfig.json
   apiItemConfigPath: api.yml
@@ -16,17 +17,3 @@ serve:
   prefixUrl: /mock
   apiItemConfigPath: api.yml
   optionalsProbability: 0.7
-
-api:
-  user:
-    url: /api/user
-    method: GET
-    model: User
-    items:
-      query:
-        url: /:username
-        desc: get user data by username
-      update:
-        url: /:username
-        method: POST
-        desc: update user info
