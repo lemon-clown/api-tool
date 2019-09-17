@@ -1,5 +1,5 @@
 {
-  "name": "@lemon-clown/api-tool",
+  "name": "api-tool",
   "version": "0.0.1",
   "description": "generate api schemas for various api platform & create mock server for schemas",
   "main": "lib/index.js",
