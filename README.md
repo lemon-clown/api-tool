@@ -1,6 +1,6 @@
 # description
 
-[![npm version](https://img.shields.io/npm/v/api-tool.svg)](https://www.npmjs.com/package/api-tool)
+[![npm version](https://img.shields.io/npm/v/@lemon-clown/api-tool.svg)](https://www.npmjs.com/package/@lemon-clown/api-tool)
 
 * 简单地来说，这个工具的作用是：ts 类型 --> JSON-SCHEMA --> mock-data --> mock-server
   - `ts 类型 --> JSON-SCHEMA`: 即把 ts 定义的类型转为 [json-schema][]，可见 [typescript-json-schema][]
@@ -10,9 +10,9 @@
 # install
 
   ```shell
-  npm install -g api-tool
+  npm install -g @lemon-clown/api-tool
   # or
-  yarn global add api-tool
+  yarn global add @lemon-clown/api-tool
   ```
 
 # usage

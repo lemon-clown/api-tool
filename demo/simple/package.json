@@ -7,7 +7,7 @@
     "serve": "nodemon --exec \"yarn build:schemas && apit serve .\""
   },
   "devDependencies": {
-    "api-tool": "^0.0.1",
+    "@lemon-clown/api-tool": "^0.0.1",
     "nodemon": "^1.19.1"
   }
 }

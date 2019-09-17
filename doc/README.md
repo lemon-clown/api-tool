@@ -7,9 +7,9 @@
 
   * 安装
     ```shell
-    npm install -g api-tool
+    npm install -g @lemon-clown/api-tool
     # or
-    yarn global add api-tool
+    yarn global add @lemon-clown/api-tool
     ```
 
 # 语法
