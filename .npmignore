@@ -1,6 +1,7 @@
 .idea/
 .vscode/
 .git/
+doc/
 demo/
 test/
 src/
