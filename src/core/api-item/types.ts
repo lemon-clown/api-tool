@@ -31,7 +31,8 @@ export interface ApiItemGroup {
 
 /**
  * api 接口条目
- * @member name               接口名称
+ * @member name               接口名称（英文名称）
+ * @member title              接口名称（中文名称，当配置文件中未指定 title，该值置为 name 的值）
  * @member url                接口路径
  * @member desc               描述
  * @member method             http 方法
@@ -43,6 +44,7 @@ export interface ApiItemGroup {
  */
 export interface ApiItem {
   name: string
+  title: string
   url: string
   desc: string
   method: HttpVerb
@@ -58,6 +60,7 @@ export interface ApiItem {
  * 配置文件中的 api 条目，需要置于 api 组下
  *
  * @member name               api 条目的名称；构成自动生成的 requestModel、responseModel、requestSchemaPath、responseSchemaPath 的一部分
+ * @member title              api 条目的名称（中文名称）
  * @member url                api 条目的路由（最终的路由以所属组中定义的 url 作为前缀）；default: ''
  * @member desc               api 条目的描述；default: ''
  * @member method             api 条目的 http 请求方法（覆盖 group 中的 method）；default: undefined
@@ -74,6 +77,7 @@ export interface ApiItem {
 export interface RawApiItem {
   name: string
   url?: string
+  title?: string
   desc?: string
   method?: HttpVerb
   model?: string

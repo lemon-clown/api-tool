@@ -123,6 +123,7 @@ export class ApiItemParser {
     const apiItems: ApiItem[] = []
     for (const rawItem of rawApiItems) {
       const name: string = rawItem.name
+      const title = coverString(name, rawItem.title)
       const url: string = apiItemGroup.url + coverString('', rawItem.url)
       const desc: string = coverString('', rawItem.desc)
       const method: HttpVerb = cover<HttpVerb>(apiItemGroup.method, rawItem.method)
@@ -161,7 +162,7 @@ export class ApiItemParser {
         : path.join(pn, responseSchemaName)
 
       const apiItem: ApiItem = {
-        name, url, desc, method, group,
+        name, title, url, desc, method, group,
         requestModel, responseModel, requestSchemaPath, responseSchemaPath
       }
       apiItems.push(apiItem)
@@ -215,9 +216,9 @@ export class ApiItemParser {
     if (data == null || typeof data !== 'object') return []
     const rawApiItems: RawApiItem[] = []
     for (const [name, rawItem] of Object.entries<RawApiItem>(data)) {
-      const { url, desc, method, model, requestModel, responseModel, requestSchemaPath, responseSchemaPath } = rawItem
+      const { url, desc, title, method, model, requestModel, responseModel, requestSchemaPath, responseSchemaPath } = rawItem
       const rawApiItem: RawApiItem = {
-        name, url, desc, method, model,
+        name, url, desc, title, method, model,
         requestModel, responseModel, requestSchemaPath, responseSchemaPath
       }
       rawApiItems.push(rawApiItem)
