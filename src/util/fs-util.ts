@@ -31,6 +31,20 @@ export function isFileSync(p: string | null): boolean {
 
 
 /**
+ * check whether p is a directory path. (synchronizing)
+ *
+ * @param p   directory path
+ * @return a boolean value whether p is a file path or not.
+ */
+export function isDirectorySync(p: string | null): boolean {
+  if (p == null) return false
+  if (!fs.existsSync(p)) return false
+  const stat = fs.statSync(p)
+  return stat.isDirectory()
+}
+
+
+/**
  * ensure p is a valid file path.
  *
  * @param p

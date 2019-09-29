@@ -2,6 +2,7 @@ import fs from 'fs-extra'
 import path from 'path'
 import { ApiItem, ApiItemParser } from '@/core/api-item'
 import { isNotBlankString } from '@/util/type-util'
+import { isDirectorySync } from '@/util/fs-util'
 
 
 /**
@@ -17,6 +18,8 @@ import { isNotBlankString } from '@/util/type-util'
  * @member requiredOnly         是否只返回 JSON-SCHEMA 中 required 的属性
  * @member alwaysFakeOptionals  是否始终都返回所有的非 required 的属性
  * @member optionalsProbability 非 required 的属性出现在 mock 数据中的几率
+ * @member useDataFileFirst     是否优先使用数据文件作为 mock 数据
+ * @member dataFileRootPath     数据文件所在的根目录
  */
 export interface ApiToolServeContextParams {
   host: string
@@ -31,6 +34,8 @@ export interface ApiToolServeContextParams {
   cwd?: string
   prefixUrl?: string
   encoding?: string
+  useDataFileFirst?: boolean
+  dataFileRootPath?: string
 }
 
 
@@ -48,6 +53,8 @@ export interface ApiToolServeContextParams {
  * @member requiredOnly         是否只返回 JSON-SCHEMA 中 required 的属性
  * @member alwaysFakeOptionals  是否始终都返回所有的非 required 的属性
  * @member optionalsProbability 非 required 的属性出现在 mock 数据中的几率
+ * @member useDataFileFirst     是否优先使用数据文件作为 mock 数据
+ * @member dataFileRootPath     数据文件所在的根目
  */
 export class ApiToolServeContext {
   public readonly cwd: string
@@ -61,6 +68,8 @@ export class ApiToolServeContext {
   public readonly requiredOnly: boolean
   public readonly alwaysFakeOptionals: boolean
   public readonly optionalsProbability: number
+  public readonly useDataFileFirst: boolean
+  public readonly dataFileRootPath?: string
 
   public constructor (params: ApiToolServeContextParams) {
     const {
@@ -76,6 +85,8 @@ export class ApiToolServeContext {
       optionalsProbability = .8,
       requiredOnly = false,
       alwaysFakeOptionals = false,
+      useDataFileFirst = false,
+      dataFileRootPath,
     } = params
 
     this.cwd = cwd
@@ -88,6 +99,12 @@ export class ApiToolServeContext {
     this.optionalsProbability = Math.min(1.0, Math.max(0.0, optionalsProbability))
     this.projectDir = path.resolve(this.cwd, projectDir)
     this.schemaRootPath = path.resolve(this.projectDir, schemaRootPath)
+    this.useDataFileFirst = useDataFileFirst
+
+    // 只有当 dataFileRootPath 被显式指定了，且为优先目录路径时
+    if (dataFileRootPath != null && isDirectorySync(path.resolve(this.projectDir, dataFileRootPath))) {
+      this.dataFileRootPath = path.resolve(this.projectDir, dataFileRootPath)
+    }
 
     const apiItemParser = new ApiItemParser({
       schemaRootPath: this.schemaRootPath,

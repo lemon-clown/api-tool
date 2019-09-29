@@ -31,6 +31,8 @@ export interface ServerOptions {
   configPath: string
   requiredOnly: boolean
   alwaysFakeOptionals: boolean
+  useDataFileFirst: boolean
+  dataFileRootPath?: string
   optionalsProbability?: number
 }
 
@@ -44,14 +46,16 @@ export function loadServeCommand (program: commander.Command, globalOptions: Glo
   program
     .command('serve <project-dir>')
     .alias('s')
-    .option('-h, --host <host>', 'specify the ip/domain address to which the mock-server listens.(default: localhost)')
-    .option('-p, --port <port>', 'specify the port on which the mock-server listens.(default: 8080)')
-    .option('-s, --schema-root-path <schemaRootPath>', 'specify the root directory (absolute or relative to the projectDir) to save schemas.(default: data/schemas)')
-    .option('-i, --api-item-config-path <apiItemConfigPath>', 'specify the location (absolute or relative to the projectDir) of file contains apiItems.(default: api.yml)')
-    .option('--prefix-url <prefixUrl>', 'specify the prefix url of routes.(default: \'\')')
-    .option('--required-only', 'json-schema-faker\'s option: if enabled, only required properties will be generated.(default: false)')
-    .option('--always-fake-optionals', 'json-schema-faker\'s option: when enabled, it will set optionalsProbability: 1.0 and fixedProbabilities: true.(default: false)')
-    .option('--optionals-probability <optionalsProbability>', 'json-schema-faker\'s option: a value from 0.0 to 1.0 to generate values in a consistent way(default: .8)')
+    .option('-h, --host <host>', 'specify the ip/domain address to which the mock-server listens. (default: localhost)')
+    .option('-p, --port <port>', 'specify the port on which the mock-server listens. (default: 8080)')
+    .option('-s, --schema-root-path <schemaRootPath>', 'specify the root directory (absolute or relative to the projectDir) to save schemas. (default: data/schemas)')
+    .option('-i, --api-item-config-path <apiItemConfigPath>', 'specify the location (absolute or relative to the projectDir) of file contains apiItems. (default: api.yml)')
+    .option('--prefix-url <prefixUrl>', 'specify the prefix url of routes. (default: \'\')')
+    .option('--use-data-file-first', 'preferred use data file as mock data source. (default: false)')
+    .option('--data-file-root-path <dataFileRootPath>', 'specify the data file (used as data source) root path. (default: undefined)')
+    .option('--required-only', 'json-schema-faker\'s option: if enabled, only required properties will be generated. (default: false)')
+    .option('--always-fake-optionals', 'json-schema-faker\'s option: when enabled, it will set optionalsProbability: 1.0 and fixedProbabilities: true. (default: false)')
+    .option('--optionals-probability <optionalsProbability>', 'json-schema-faker\'s option: a value from 0.0 to 1.0 to generate values in a consistent way. (default: .8)')
     .action(async function (projectDir: string, options: ServerOptions) {
       const cwd = globalOptions.cwd.value
       logger.debug('[serve] cwd:', cwd)
@@ -74,6 +78,8 @@ export function loadServeCommand (program: commander.Command, globalOptions: Glo
       const schemaRootPath = resolvePath('schemaRootPath', 'data/schemas')
       const apiItemConfigPath = resolvePath('apiItemConfigPath', 'api.yml')
       const mainConfigPath = globalOptions.configPath.value
+      const useDataFileFirst = coverBooleanForCliOption(false, contextParams.useDataFileFirst, options.useDataFileFirst)
+      const dataFileRootPath = coverStringForCliOption(undefined as any, contextParams.dataFileRootPath, options.dataFileRootPath)
       const requiredOnly = coverBooleanForCliOption(false, contextParams.requiredOnly, options.requiredOnly)
       const alwaysFakeOptionals = coverBooleanForCliOption(false, contextParams.alwaysFakeOptionals, options.alwaysFakeOptionals)
       const optionalsProbability: number = coverNumberForCliOption(.8, contextParams.optionalsProbability, options.optionalsProbability)
@@ -85,6 +91,9 @@ export function loadServeCommand (program: commander.Command, globalOptions: Glo
       logger.debug('[serve] prefixUrl:', prefixUrl)
       logger.debug('[serve] schemaRootPath:', schemaRootPath)
       logger.debug('[serve] apiItemConfigPath:', apiItemConfigPath)
+      logger.debug('[serve] mainConfigPath:', mainConfigPath)
+      logger.debug('[serve] useDataFileFirst:', useDataFileFirst)
+      logger.debug('[serve] dataFileRootPath:', dataFileRootPath)
       logger.debug('[serve] requiredOnly:', requiredOnly)
       logger.debug('[serve] alwaysFakeOptionals:', alwaysFakeOptionals)
       logger.debug('[serve] optionalsProbability:', optionalsProbability)
@@ -98,6 +107,8 @@ export function loadServeCommand (program: commander.Command, globalOptions: Glo
         apiItemConfigPath,
         mainConfigPath,
         encoding,
+        useDataFileFirst,
+        dataFileRootPath,
         requiredOnly,
         alwaysFakeOptionals,
         optionalsProbability,

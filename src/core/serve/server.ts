@@ -9,6 +9,7 @@ import { isFile } from '@/util/fs-util'
 import { logger } from '@/util/logger'
 import { accessLog } from './middleware/access-log'
 import { ApiToolServeContext } from './context'
+import { dataFileMock } from './middleware/data-file-mock'
 const koaCors = require('@koa/cors')
 const jsf = require('json-schema-faker')
 
@@ -27,7 +28,7 @@ export class ApiToolMockServer {
   }
 
   public async start(): Promise<void> {
-    const { host, port } = this.context
+    const { host, port, prefixUrl, useDataFileFirst, dataFileRootPath } = this.context
     const app = new Koa()
     const router = await this.generateRoutes()
 
@@ -35,6 +36,13 @@ export class ApiToolMockServer {
       .use(accessLog())
       .use(koaCors())
       .use(koaJson())
+
+    // 如果指定了 dataFileRootPath，则将文件数据源作为一种 mock 数据源
+    if (dataFileRootPath != null) {
+      app.use(dataFileMock({ prefixUrl, dataFileRootPath, useDataFileFirst }))
+    }
+
+    app
       .use(router.routes())
       .use(router.allowedMethods())
 
